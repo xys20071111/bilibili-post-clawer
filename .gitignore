@@ -1,0 +1,9 @@
+*.json*
+*.kv*
+.env
+browser-data
+
+.vscode
+.theia
+
+!deno.json
