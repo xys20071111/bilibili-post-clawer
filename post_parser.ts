@@ -11,8 +11,8 @@ export interface VideoInfo {
     cover: string
     jumpUrl: string
     duration: string
-    avId: string
-    bvId: string
+    avid: string
+    bvid: string
     stats: any
 }
 
@@ -94,8 +94,8 @@ export function parseDynamicItem(item: any): ParsedDynamicItem {
                     cover: dynamicModule.dyn_archive.cover,
                     jumpUrl: dynamicModule.dyn_archive.jump_url,
                     duration: dynamicModule.dyn_archive.duration_text,
-                    avId: dynamicModule.dyn_archive.aid,
-                    bvId: dynamicModule.dyn_archive.bvid,
+                    avid: dynamicModule.dyn_archive.aid,
+                    bvid: dynamicModule.dyn_archive.bvid,
                     stats: dynamicModule.dyn_archive.stat
                 }
             }
@@ -151,8 +151,8 @@ export function parseDynamicItem(item: any): ParsedDynamicItem {
                     cover: dynamicModule?.major?.archive?.cover,
                     jumpUrl: dynamicModule?.major?.archive?.jump_url,
                     duration: dynamicModule?.major?.archive?.duration_text,
-                    avId: dynamicModule?.major?.archive?.aid,
-                    bvId: dynamicModule?.major?.archive?.bvid,
+                    avid: dynamicModule?.major?.archive?.aid,
+                    bvid: dynamicModule?.major?.archive?.bvid,
                     stats: dynamicModule?.major?.archive?.stat
                 }
             }

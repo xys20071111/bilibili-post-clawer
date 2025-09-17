@@ -1,7 +1,7 @@
 /// <reference lib="dom" />
 /// <reference lib="deno.unstable" />
 
-import { launch, Page } from "puppeteer-core"
+import { Browser, launch, Page } from "puppeteer-core"
 import { sleep } from "./utils.ts"
 import { parseDynamicItem } from "./post_parser.ts"
 
@@ -27,14 +27,7 @@ async function fetchPostIds(page: Page) {
     return result
 }
 
-export async function fetchPostIdsFromBrowser(stopAt: number, mid: string, baseOffset: string, storage: Deno.Kv) {
-    const browser = await launch({
-        headless: false,
-        executablePath: "/usr/bin/google-chrome",
-        userDataDir: "./browser-data",
-        devtools: false,
-        defaultViewport: null
-    })
+export async function fetchPostIdsFromBrowser(browser: Browser, stopAt: number, mid: string, baseOffset: string, storage: Deno.Kv) {
     const page = await browser.newPage()
     await page.goto('https://www.bilibili.com')
     // 获取出错时，在deno中报错
@@ -44,7 +37,7 @@ export async function fetchPostIdsFromBrowser(stopAt: number, mid: string, baseO
     await page.exposeFunction('denoLog', (...args: any[]) => {
         console.log.apply(null, args)
     })
-    await page.waitForSelector('.logo-img')
+    // await page.waitForSelector('.logo-img')
     //向页面提供当前的id
     page.exposeFunction('getMid', () => {
         return mid
@@ -71,7 +64,6 @@ export async function fetchPostIdsFromBrowser(stopAt: number, mid: string, baseO
                     if (publishTime < stopAt) {
                         console.log(`Post ${id} older than ${stopAt}, stop fetching!`)
                         await page.close()
-                        await browser.close()
                         return
                     }
                     await storage.set(['postId', id], item.type)
@@ -85,7 +77,6 @@ export async function fetchPostIdsFromBrowser(stopAt: number, mid: string, baseO
         await sleep(15)
     }
     await page.close()
-    await browser.close()
 }
 
 if (import.meta.main) {
@@ -93,10 +84,18 @@ if (import.meta.main) {
     const OFFSET = Deno.env.get('OFFSET') ?? ''
     const STOP_AT = Deno.env.get('STOP_AT') ?? '0'
     const storage = await Deno.openKv('posts.kv')
+    const browser = await launch({
+        headless: false,
+        executablePath: "/usr/bin/google-chrome",
+        userDataDir: "./browser-data",
+        devtools: false,
+        defaultViewport: null
+    })
     let stopAt = parseInt(STOP_AT)
     if (isNaN(stopAt)) {
         stopAt = 0
     }
-    await fetchPostIdsFromBrowser(stopAt, MID, OFFSET, storage)
+    await fetchPostIdsFromBrowser(browser, stopAt, MID, OFFSET, storage)
     storage.close()
+    await browser.close()
 }

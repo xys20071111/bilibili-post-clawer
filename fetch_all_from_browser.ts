@@ -1,3 +1,4 @@
+import { launch } from "puppeteer-core"
 import { fetchPostDetailsFromBrowser } from "./fetch_post_details_from_browser.ts"
 import { fetchPostIdsFromBrowser } from "./fetch_post_ids_from_browser.ts"
 import { parseDynamicItem } from "./post_parser.ts"
@@ -7,6 +8,7 @@ let stopAt = parseInt(STOP_AT)
 if (isNaN(stopAt)) {
     stopAt = 0
 }
+console.log(`Will stop when post older than ${stopAt}`)
 
 const midList = [
     '3821157',
@@ -26,13 +28,22 @@ const midList = [
     '1823500310',
     '3494349511854939',
     '3493126803032322',
+    '2138602891',
+    '3570093'
 ]
 
 const storage = await Deno.openKv('posts.kv')
+const browser = await launch({
+    headless: false,
+    executablePath: "/usr/bin/google-chrome",
+    userDataDir: "./browser-data",
+    devtools: false,
+    defaultViewport: null
+})
 
 for (const mid of midList) {
     console.log(`Current mid: ${mid}`)
-    await fetchPostIdsFromBrowser(stopAt, mid, '', storage)
+    await fetchPostIdsFromBrowser(browser, stopAt, mid, '', storage)
 }
 
 const idIter = storage.list({
@@ -42,7 +53,7 @@ const idList: Array<string> = []
 for await (const id of idIter) {
     idList.push(id.key[1] as string)
 }
-await fetchPostDetailsFromBrowser(storage, idList)
+await fetchPostDetailsFromBrowser(browser, storage, idList)
 
 const postIter = storage.list({
     prefix: ['post']
@@ -59,4 +70,5 @@ for await (const post of postIter) {
         }
     }
 }
-await fetchPostDetailsFromBrowser(storage, origIdList)
+await fetchPostDetailsFromBrowser(browser, storage, origIdList)
+await browser.close()
