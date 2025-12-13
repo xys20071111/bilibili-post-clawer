@@ -1,7 +1,7 @@
 /// <reference lib="dom" />
 /// <reference lib="deno.unstable" />
 
-import { Browser, launch, Page } from "puppeteer-core";
+import { launch, Page } from "puppeteer-core";
 import { sleep } from "./utils.ts";
 import { parseDynamicItem } from "./post_parser.ts";
 
@@ -84,7 +84,7 @@ export async function fetchPostRepliesFromBrowser(
         continue;
       }
     }
-    await sleep(5);
+    await sleep(1.5);
     pageNum++;
   }
   await page.removeExposedFunction("denoAlert");
@@ -104,6 +104,7 @@ if (import.meta.main) {
     devtools: false,
     defaultViewport: null,
     pipe: true,
+    protocolTimeout: 24 * 30 * 60 * 60 * 1000,
   });
   const postList = storage.list({
     prefix: ["post"],
