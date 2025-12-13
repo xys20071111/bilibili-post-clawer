@@ -99,7 +99,7 @@ if (import.meta.main) {
   const repliesStorage = await Deno.openKv("replies.kv");
   const browser = await launch({
     headless: false,
-    executablePath: "/usr/bin/google-chrome",
+    executablePath: Deno.env.get("CHROME_PATH") ?? "/usr/bin/google-chrome",
     userDataDir: "./browser-data",
     devtools: false,
     defaultViewport: null,
