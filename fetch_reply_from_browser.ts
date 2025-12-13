@@ -104,7 +104,7 @@ if (import.meta.main) {
     devtools: false,
     defaultViewport: null,
     pipe: true,
-    protocolTimeout: 24 * 30 * 60 * 60 * 1000,
+    protocolTimeout: 30 * 60 * 60 * 1000,
   });
   const postList = storage.list({
     prefix: ["post"],
