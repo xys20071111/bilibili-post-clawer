@@ -1,9 +1,11 @@
 /// <reference lib="dom" />
 /// <reference lib="deno.unstable" />
 
-import { launch, Page } from "puppeteer-core";
+import puppeteer from "puppeteer-extra";
+import Stealth from "puppeteer-extra-plugin-stealth";
 import { sleep } from "./utils.ts";
 import { parseDynamicItem } from "./post_parser.ts";
+import { Page } from "puppeteer-core";
 
 async function fetchPostReplies(page: Page) {
   const result = await page.evaluate(async () => {
@@ -97,14 +99,30 @@ export async function fetchPostRepliesFromBrowser(
 if (import.meta.main) {
   const storage = await Deno.openKv("posts.kv");
   const repliesStorage = await Deno.openKv("replies.kv");
-  const browser = await launch({
-    headless: false,
+  puppeteer.default.use(Stealth());
+  const browser = await puppeteer.default.launch({
+    headless: true,
     executablePath: Deno.env.get("CHROME_PATH") ?? "/usr/bin/google-chrome",
     userDataDir: "./browser-data",
     devtools: false,
     defaultViewport: null,
     pipe: true,
     protocolTimeout: 30 * 60 * 60 * 1000,
+    args: [
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--disable-background-networking",
+      "--disable-sync",
+      "--disable-translate",
+      "--hide-scrollbars",
+      "--mute-audio",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--disable-popup-blocking",
+      "--disable-background-timer-throttling",
+      "--disable-renderer-backgrounding",
+      "--disable-device-discovery-notifications",
+    ],
   });
   const postList = storage.list({
     prefix: ["post"],

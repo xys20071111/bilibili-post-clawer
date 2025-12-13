@@ -1,7 +1,9 @@
 {
   "version": "5",
   "specifiers": {
-    "npm:puppeteer-core@^24.20.0": "24.20.0_devtools-protocol@0.0.1495869"
+    "npm:puppeteer-core@^24.20.0": "24.20.0_devtools-protocol@0.0.1495869",
+    "npm:puppeteer-extra-plugin-stealth@^2.11.2": "2.11.2_puppeteer-extra@3.3.6__puppeteer-core@24.20.0___devtools-protocol@0.0.1495869_puppeteer-core@24.20.0__devtools-protocol@0.0.1495869",
+    "npm:puppeteer-extra@^3.3.6": "3.3.6_puppeteer-core@24.20.0__devtools-protocol@0.0.1495869"
   },
   "npm": {
     "@puppeteer/browsers@2.10.9": {
@@ -21,6 +23,17 @@
     "@tootallnate/quickjs-emscripten@0.23.0": {
       "integrity": "sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==",
       "tarball": "https://registry.npmmirror.com/@tootallnate/quickjs-emscripten/-/quickjs-emscripten-0.23.0.tgz"
+    },
+    "@types/debug@4.1.12": {
+      "integrity": "sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==",
+      "dependencies": [
+        "@types/ms"
+      ],
+      "tarball": "https://registry.npmmirror.com/@types/debug/-/debug-4.1.12.tgz"
+    },
+    "@types/ms@2.1.0": {
+      "integrity": "sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==",
+      "tarball": "https://registry.npmmirror.com/@types/ms/-/ms-2.1.0.tgz"
     },
     "@types/node@24.2.0": {
       "integrity": "sha512-3xyG3pMCq3oYCNg7/ZP+E1ooTaGB4cG8JWRsqqOYQdbWNY4zbaV0Ennrd7stjiJEFZCaybcIgpTjJWHRfBSIDw==",
@@ -51,6 +64,10 @@
       ],
       "tarball": "https://registry.npmmirror.com/ansi-styles/-/ansi-styles-4.3.0.tgz"
     },
+    "arr-union@3.1.0": {
+      "integrity": "sha512-sKpyeERZ02v1FeCZT8lrfJq5u6goHCtpTAzPwJYe7c8SPFOboNjNg1vz2L4VTn9T4PQxEx13TbXLmYUcS6Ug7Q==",
+      "tarball": "https://registry.npmmirror.com/arr-union/-/arr-union-3.1.0.tgz"
+    },
     "ast-types@0.13.4": {
       "integrity": "sha512-x1FCFnFifvYDDzTaLII71vG5uvDwgtmDTEVWAxrgeiR8VjMONcCXJx7E+USjDtHlwFmt9MysbqgF9b9Vjr6w+w==",
       "dependencies": [
@@ -61,6 +78,10 @@
     "b4a@1.7.1": {
       "integrity": "sha512-ZovbrBV0g6JxK5cGUF1Suby1vLfKjv4RWi8IxoaO/Mon8BDD9I21RxjHFtgQ+kskJqLAVyQZly3uMBui+vhc8Q==",
       "tarball": "https://registry.npmmirror.com/b4a/-/b4a-1.7.1.tgz"
+    },
+    "balanced-match@1.0.2": {
+      "integrity": "sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==",
+      "tarball": "https://registry.npmmirror.com/balanced-match/-/balanced-match-1.0.2.tgz"
     },
     "bare-events@2.6.1": {
       "integrity": "sha512-AuTJkq9XmE6Vk0FJVNq5QxETrSA/vKHarWVBG5l/JbdCL1prJemiyJqUS0jrlXO0MftuPq4m3YVYhoNc5+aE/g==",
@@ -110,6 +131,14 @@
       "integrity": "sha512-4Bcg1P8xhUuqcii/S0Z9wiHIrQVPMermM1any+MX5GeGD7faD3/msQUDGLol9wOcz4/jbg/WJnGqoJF6LiBdtg==",
       "tarball": "https://registry.npmmirror.com/basic-ftp/-/basic-ftp-5.0.5.tgz"
     },
+    "brace-expansion@1.1.12": {
+      "integrity": "sha512-9T9UjW3r0UW5c1Q7GTwllptXwhvYmEzFhzMfZ9H7FQWt+uZePjZPjBP/W1ZEyZ1twGWom5/56TF4lPcqjnDHcg==",
+      "dependencies": [
+        "balanced-match",
+        "concat-map"
+      ],
+      "tarball": "https://registry.npmmirror.com/brace-expansion/-/brace-expansion-1.1.12.tgz"
+    },
     "buffer-crc32@0.2.13": {
       "integrity": "sha512-VO9Ht/+p3SN7SKWqcrgEzjGbRSJYTx+Q1pTQC0wrWqHx0vpJraQ6GtHx8tvcg1rlK1byhU5gccxgOgj7B0TDkQ==",
       "tarball": "https://registry.npmmirror.com/buffer-crc32/-/buffer-crc32-0.2.13.tgz"
@@ -132,6 +161,17 @@
       ],
       "tarball": "https://registry.npmmirror.com/cliui/-/cliui-8.0.1.tgz"
     },
+    "clone-deep@0.2.4": {
+      "integrity": "sha512-we+NuQo2DHhSl+DP6jlUiAhyAjBQrYnpOk15rN6c6JSPScjiCLh8IbSU+VTcph6YS3o7mASE8a0+gbZ7ChLpgg==",
+      "dependencies": [
+        "for-own",
+        "is-plain-object",
+        "kind-of@3.2.2",
+        "lazy-cache@1.0.4",
+        "shallow-clone"
+      ],
+      "tarball": "https://registry.npmmirror.com/clone-deep/-/clone-deep-0.2.4.tgz"
+    },
     "color-convert@2.0.1": {
       "integrity": "sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==",
       "dependencies": [
@@ -143,6 +183,10 @@
       "integrity": "sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==",
       "tarball": "https://registry.npmmirror.com/color-name/-/color-name-1.1.4.tgz"
     },
+    "concat-map@0.0.1": {
+      "integrity": "sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==",
+      "tarball": "https://registry.npmmirror.com/concat-map/-/concat-map-0.0.1.tgz"
+    },
     "data-uri-to-buffer@6.0.2": {
       "integrity": "sha512-7hvf7/GW8e86rW0ptuwS3OcBGDjIi6SZva7hCyWC0yYry2cOPmLIjXAUHI6DK2HsnwJd9ifmt57i8eV2n4YNpw==",
       "tarball": "https://registry.npmmirror.com/data-uri-to-buffer/-/data-uri-to-buffer-6.0.2.tgz"
@@ -153,6 +197,10 @@
         "ms"
       ],
       "tarball": "https://registry.npmmirror.com/debug/-/debug-4.4.1.tgz"
+    },
+    "deepmerge@4.3.1": {
+      "integrity": "sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==",
+      "tarball": "https://registry.npmmirror.com/deepmerge/-/deepmerge-4.3.1.tgz"
     },
     "degenerator@5.0.1": {
       "integrity": "sha512-TllpMR/t0M5sqCXfj85i4XaAzxmS5tVA16dqvdkMwGmzI+dXLXnw3J+3Vdv7VKw+ThlTMboK6i9rnZ6Nntj5CQ==",
@@ -232,6 +280,34 @@
       ],
       "tarball": "https://registry.npmmirror.com/fd-slicer/-/fd-slicer-1.1.0.tgz"
     },
+    "for-in@0.1.8": {
+      "integrity": "sha512-F0to7vbBSHP8E3l6dCjxNOLuSFAACIxFy3UehTUlG7svlXi37HHsDkyVcHo0Pq8QwrE+pXvWSVX3ZT1T9wAZ9g==",
+      "tarball": "https://registry.npmmirror.com/for-in/-/for-in-0.1.8.tgz"
+    },
+    "for-in@1.0.2": {
+      "integrity": "sha512-7EwmXrOjyL+ChxMhmG5lnW9MPt1aIeZEwKhQzoBUdTV0N3zuwWDZYVJatDvZ2OyzPUvdIAZDsCetk3coyMfcnQ==",
+      "tarball": "https://registry.npmmirror.com/for-in/-/for-in-1.0.2.tgz"
+    },
+    "for-own@0.1.5": {
+      "integrity": "sha512-SKmowqGTJoPzLO1T0BBJpkfp3EMacCMOuH40hOUbrbzElVktk4DioXVM99QkLCyKoiuOmyjgcWMpVz2xjE7LZw==",
+      "dependencies": [
+        "for-in@1.0.2"
+      ],
+      "tarball": "https://registry.npmmirror.com/for-own/-/for-own-0.1.5.tgz"
+    },
+    "fs-extra@10.1.0": {
+      "integrity": "sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==",
+      "dependencies": [
+        "graceful-fs",
+        "jsonfile",
+        "universalify"
+      ],
+      "tarball": "https://registry.npmmirror.com/fs-extra/-/fs-extra-10.1.0.tgz"
+    },
+    "fs.realpath@1.0.0": {
+      "integrity": "sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==",
+      "tarball": "https://registry.npmmirror.com/fs.realpath/-/fs.realpath-1.0.0.tgz"
+    },
     "get-caller-file@2.0.5": {
       "integrity": "sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==",
       "tarball": "https://registry.npmmirror.com/get-caller-file/-/get-caller-file-2.0.5.tgz"
@@ -252,6 +328,23 @@
       ],
       "tarball": "https://registry.npmmirror.com/get-uri/-/get-uri-6.0.5.tgz"
     },
+    "glob@7.2.3": {
+      "integrity": "sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==",
+      "dependencies": [
+        "fs.realpath",
+        "inflight",
+        "inherits",
+        "minimatch",
+        "once",
+        "path-is-absolute"
+      ],
+      "deprecated": true,
+      "tarball": "https://registry.npmmirror.com/glob/-/glob-7.2.3.tgz"
+    },
+    "graceful-fs@4.2.11": {
+      "integrity": "sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==",
+      "tarball": "https://registry.npmmirror.com/graceful-fs/-/graceful-fs-4.2.11.tgz"
+    },
     "http-proxy-agent@7.0.2": {
       "integrity": "sha512-T1gkAiYYDWYx3V5Bmyu7HcfcvL7mUrTWiM6yOfa3PIphViJ/gFPbvidQ+veqSOHci/PxBcDabeUNCzpOODJZig==",
       "dependencies": [
@@ -268,21 +361,109 @@
       ],
       "tarball": "https://registry.npmmirror.com/https-proxy-agent/-/https-proxy-agent-7.0.6.tgz"
     },
+    "inflight@1.0.6": {
+      "integrity": "sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==",
+      "dependencies": [
+        "once",
+        "wrappy"
+      ],
+      "deprecated": true,
+      "tarball": "https://registry.npmmirror.com/inflight/-/inflight-1.0.6.tgz"
+    },
+    "inherits@2.0.4": {
+      "integrity": "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==",
+      "tarball": "https://registry.npmmirror.com/inherits/-/inherits-2.0.4.tgz"
+    },
     "ip-address@10.0.1": {
       "integrity": "sha512-NWv9YLW4PoW2B7xtzaS3NCot75m6nK7Icdv0o3lfMceJVRfSoQwqD4wEH5rLwoKJwUiZ/rfpiVBhnaF0FK4HoA==",
       "tarball": "https://registry.npmmirror.com/ip-address/-/ip-address-10.0.1.tgz"
+    },
+    "is-buffer@1.1.6": {
+      "integrity": "sha512-NcdALwpXkTm5Zvvbk7owOUSvVvBKDgKP5/ewfXEznmQFfs4ZRmanOeKBTjRVjka3QFoN6XJ+9F3USqfHqTaU5w==",
+      "tarball": "https://registry.npmmirror.com/is-buffer/-/is-buffer-1.1.6.tgz"
+    },
+    "is-extendable@0.1.1": {
+      "integrity": "sha512-5BMULNob1vgFX6EjQw5izWDxrecWK9AM72rugNr0TFldMOi0fj6Jk+zeKIt0xGj4cEfQIJth4w3OKWOJ4f+AFw==",
+      "tarball": "https://registry.npmmirror.com/is-extendable/-/is-extendable-0.1.1.tgz"
     },
     "is-fullwidth-code-point@3.0.0": {
       "integrity": "sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg==",
       "tarball": "https://registry.npmmirror.com/is-fullwidth-code-point/-/is-fullwidth-code-point-3.0.0.tgz"
     },
+    "is-plain-object@2.0.4": {
+      "integrity": "sha512-h5PpgXkWitc38BBMYawTYMWJHFZJVnBquFE57xFpjB8pJFiF6gZ+bU+WyI/yqXiFR5mdLsgYNaPe8uao6Uv9Og==",
+      "dependencies": [
+        "isobject"
+      ],
+      "tarball": "https://registry.npmmirror.com/is-plain-object/-/is-plain-object-2.0.4.tgz"
+    },
+    "isobject@3.0.1": {
+      "integrity": "sha512-WhB9zCku7EGTj/HQQRz5aUQEUeoQZH2bWcltRErOpymJ4boYE6wL9Tbr23krRPSZ+C5zqNSrSw+Cc7sZZ4b7vg==",
+      "tarball": "https://registry.npmmirror.com/isobject/-/isobject-3.0.1.tgz"
+    },
+    "jsonfile@6.2.0": {
+      "integrity": "sha512-FGuPw30AdOIUTRMC2OMRtQV+jkVj2cfPqSeWXv1NEAJ1qZ5zb1X6z1mFhbfOB/iy3ssJCD+3KuZ8r8C3uVFlAg==",
+      "dependencies": [
+        "universalify"
+      ],
+      "optionalDependencies": [
+        "graceful-fs"
+      ],
+      "tarball": "https://registry.npmmirror.com/jsonfile/-/jsonfile-6.2.0.tgz"
+    },
+    "kind-of@2.0.1": {
+      "integrity": "sha512-0u8i1NZ/mg0b+W3MGGw5I7+6Eib2nx72S/QvXa0hYjEkjTknYmEYQJwGu3mLC0BrhtJjtQafTkyRUQ75Kx0LVg==",
+      "dependencies": [
+        "is-buffer"
+      ],
+      "tarball": "https://registry.npmmirror.com/kind-of/-/kind-of-2.0.1.tgz"
+    },
+    "kind-of@3.2.2": {
+      "integrity": "sha512-NOW9QQXMoZGg/oqnVNoNTTIFEIid1627WCffUBJEdMxYApq7mNE7CpzucIPc+ZQg25Phej7IJSmX3hO+oblOtQ==",
+      "dependencies": [
+        "is-buffer"
+      ],
+      "tarball": "https://registry.npmmirror.com/kind-of/-/kind-of-3.2.2.tgz"
+    },
+    "lazy-cache@0.2.7": {
+      "integrity": "sha512-gkX52wvU/R8DVMMt78ATVPFMJqfW8FPz1GZ1sVHBVQHmu/WvhIWE4cE1GBzhJNFicDeYhnwp6Rl35BcAIM3YOQ==",
+      "tarball": "https://registry.npmmirror.com/lazy-cache/-/lazy-cache-0.2.7.tgz"
+    },
+    "lazy-cache@1.0.4": {
+      "integrity": "sha512-RE2g0b5VGZsOCFOCgP7omTRYFqydmZkBwl5oNnQ1lDYC57uyO9KqNnNVxT7COSHTxrRCWVcAVOcbjk+tvh/rgQ==",
+      "tarball": "https://registry.npmmirror.com/lazy-cache/-/lazy-cache-1.0.4.tgz"
+    },
     "lru-cache@7.18.3": {
       "integrity": "sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==",
       "tarball": "https://registry.npmmirror.com/lru-cache/-/lru-cache-7.18.3.tgz"
     },
+    "merge-deep@3.0.3": {
+      "integrity": "sha512-qtmzAS6t6grwEkNrunqTBdn0qKwFgNWvlxUbAV8es9M7Ot1EbyApytCnvE0jALPa46ZpKDUo527kKiaWplmlFA==",
+      "dependencies": [
+        "arr-union",
+        "clone-deep",
+        "kind-of@3.2.2"
+      ],
+      "tarball": "https://registry.npmmirror.com/merge-deep/-/merge-deep-3.0.3.tgz"
+    },
+    "minimatch@3.1.2": {
+      "integrity": "sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==",
+      "dependencies": [
+        "brace-expansion"
+      ],
+      "tarball": "https://registry.npmmirror.com/minimatch/-/minimatch-3.1.2.tgz"
+    },
     "mitt@3.0.1": {
       "integrity": "sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==",
       "tarball": "https://registry.npmmirror.com/mitt/-/mitt-3.0.1.tgz"
+    },
+    "mixin-object@2.0.1": {
+      "integrity": "sha512-ALGF1Jt9ouehcaXaHhn6t1yGWRqGaHkPFndtFVHfZXOvkIZ/yoGaSi0AHVTafb3ZBGg4dr/bDwnaEKqCXzchMA==",
+      "dependencies": [
+        "for-in@0.1.8",
+        "is-extendable"
+      ],
+      "tarball": "https://registry.npmmirror.com/mixin-object/-/mixin-object-2.0.1.tgz"
     },
     "ms@2.1.3": {
       "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==",
@@ -320,6 +501,10 @@
         "netmask"
       ],
       "tarball": "https://registry.npmmirror.com/pac-resolver/-/pac-resolver-7.0.1.tgz"
+    },
+    "path-is-absolute@1.0.1": {
+      "integrity": "sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==",
+      "tarball": "https://registry.npmmirror.com/path-is-absolute/-/path-is-absolute-1.0.1.tgz"
     },
     "pend@1.2.0": {
       "integrity": "sha512-F3asv42UuXchdzt+xXqfW1OGlVBe+mxa2mqI0pg5yAHZPvFmY3Y6drSf/GQ1A86WgWEN9Kzh/WrgKa6iGcHXLg==",
@@ -368,14 +553,100 @@
       ],
       "tarball": "https://registry.npmmirror.com/puppeteer-core/-/puppeteer-core-24.20.0.tgz"
     },
+    "puppeteer-extra-plugin-stealth@2.11.2_puppeteer-extra@3.3.6__puppeteer-core@24.20.0___devtools-protocol@0.0.1495869_puppeteer-core@24.20.0__devtools-protocol@0.0.1495869": {
+      "integrity": "sha512-bUemM5XmTj9i2ZerBzsk2AN5is0wHMNE6K0hXBzBXOzP5m5G3Wl0RHhiqKeHToe/uIH8AoZiGhc1tCkLZQPKTQ==",
+      "dependencies": [
+        "debug",
+        "puppeteer-extra",
+        "puppeteer-extra-plugin",
+        "puppeteer-extra-plugin-user-preferences"
+      ],
+      "optionalPeers": [
+        "puppeteer-extra"
+      ],
+      "tarball": "https://registry.npmmirror.com/puppeteer-extra-plugin-stealth/-/puppeteer-extra-plugin-stealth-2.11.2.tgz"
+    },
+    "puppeteer-extra-plugin-user-data-dir@2.4.1_puppeteer-extra@3.3.6__puppeteer-core@24.20.0___devtools-protocol@0.0.1495869_puppeteer-core@24.20.0__devtools-protocol@0.0.1495869": {
+      "integrity": "sha512-kH1GnCcqEDoBXO7epAse4TBPJh9tEpVEK/vkedKfjOVOhZAvLkHGc9swMs5ChrJbRnf8Hdpug6TJlEuimXNQ+g==",
+      "dependencies": [
+        "debug",
+        "fs-extra",
+        "puppeteer-extra",
+        "puppeteer-extra-plugin",
+        "rimraf"
+      ],
+      "optionalPeers": [
+        "puppeteer-extra"
+      ],
+      "tarball": "https://registry.npmmirror.com/puppeteer-extra-plugin-user-data-dir/-/puppeteer-extra-plugin-user-data-dir-2.4.1.tgz"
+    },
+    "puppeteer-extra-plugin-user-preferences@2.4.1_puppeteer-extra@3.3.6__puppeteer-core@24.20.0___devtools-protocol@0.0.1495869_puppeteer-core@24.20.0__devtools-protocol@0.0.1495869": {
+      "integrity": "sha512-i1oAZxRbc1bk8MZufKCruCEC3CCafO9RKMkkodZltI4OqibLFXF3tj6HZ4LZ9C5vCXZjYcDWazgtY69mnmrQ9A==",
+      "dependencies": [
+        "debug",
+        "deepmerge",
+        "puppeteer-extra",
+        "puppeteer-extra-plugin",
+        "puppeteer-extra-plugin-user-data-dir"
+      ],
+      "optionalPeers": [
+        "puppeteer-extra"
+      ],
+      "tarball": "https://registry.npmmirror.com/puppeteer-extra-plugin-user-preferences/-/puppeteer-extra-plugin-user-preferences-2.4.1.tgz"
+    },
+    "puppeteer-extra-plugin@3.2.3_puppeteer-extra@3.3.6__puppeteer-core@24.20.0___devtools-protocol@0.0.1495869_puppeteer-core@24.20.0__devtools-protocol@0.0.1495869": {
+      "integrity": "sha512-6RNy0e6pH8vaS3akPIKGg28xcryKscczt4wIl0ePciZENGE2yoaQJNd17UiEbdmh5/6WW6dPcfRWT9lxBwCi2Q==",
+      "dependencies": [
+        "@types/debug",
+        "debug",
+        "merge-deep",
+        "puppeteer-extra"
+      ],
+      "optionalPeers": [
+        "puppeteer-extra"
+      ],
+      "tarball": "https://registry.npmmirror.com/puppeteer-extra-plugin/-/puppeteer-extra-plugin-3.2.3.tgz"
+    },
+    "puppeteer-extra@3.3.6_puppeteer-core@24.20.0__devtools-protocol@0.0.1495869": {
+      "integrity": "sha512-rsLBE/6mMxAjlLd06LuGacrukP2bqbzKCLzV1vrhHFavqQE/taQ2UXv3H5P0Ls7nsrASa+6x3bDbXHpqMwq+7A==",
+      "dependencies": [
+        "@types/debug",
+        "debug",
+        "deepmerge",
+        "puppeteer-core"
+      ],
+      "optionalPeers": [
+        "puppeteer-core"
+      ],
+      "tarball": "https://registry.npmmirror.com/puppeteer-extra/-/puppeteer-extra-3.3.6.tgz"
+    },
     "require-directory@2.1.1": {
       "integrity": "sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==",
       "tarball": "https://registry.npmmirror.com/require-directory/-/require-directory-2.1.1.tgz"
+    },
+    "rimraf@3.0.2": {
+      "integrity": "sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==",
+      "dependencies": [
+        "glob"
+      ],
+      "deprecated": true,
+      "bin": true,
+      "tarball": "https://registry.npmmirror.com/rimraf/-/rimraf-3.0.2.tgz"
     },
     "semver@7.7.2": {
       "integrity": "sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==",
       "bin": true,
       "tarball": "https://registry.npmmirror.com/semver/-/semver-7.7.2.tgz"
+    },
+    "shallow-clone@0.1.2": {
+      "integrity": "sha512-J1zdXCky5GmNnuauESROVu31MQSnLoYvlyEn6j2Ztk6Q5EHFIhxkMhYcv6vuDzl2XEzoRr856QwzMgWM/TmZgw==",
+      "dependencies": [
+        "is-extendable",
+        "kind-of@2.0.1",
+        "lazy-cache@0.2.7",
+        "mixin-object"
+      ],
+      "tarball": "https://registry.npmmirror.com/shallow-clone/-/shallow-clone-0.1.2.tgz"
     },
     "smart-buffer@4.2.0": {
       "integrity": "sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==",
@@ -469,6 +740,10 @@
       "integrity": "sha512-t5Fy/nfn+14LuOc2KNYg75vZqClpAiqscVvMygNnlsHBFpSXdJaYtXMcdNLpl/Qvc3P2cB3s6lOV51nqsFq4ag==",
       "tarball": "https://registry.npmmirror.com/undici-types/-/undici-types-7.10.0.tgz"
     },
+    "universalify@2.0.1": {
+      "integrity": "sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==",
+      "tarball": "https://registry.npmmirror.com/universalify/-/universalify-2.0.1.tgz"
+    },
     "webdriver-bidi-protocol@0.2.8": {
       "integrity": "sha512-KPvtVAIX8VHjLZH1KHT5GXoOaPeb0Ju+JlAcdshw6Z/gsmRtLoxt0Hw99PgJwZta7zUQaAUIHHWDRkzrPHsQTQ==",
       "tarball": "https://registry.npmmirror.com/webdriver-bidi-protocol/-/webdriver-bidi-protocol-0.2.8.tgz"
@@ -526,7 +801,9 @@
   },
   "workspace": {
     "dependencies": [
-      "npm:puppeteer-core@^24.20.0"
+      "npm:puppeteer-core@^24.20.0",
+      "npm:puppeteer-extra-plugin-stealth@^2.11.2",
+      "npm:puppeteer-extra@^3.3.6"
     ]
   }
 }
