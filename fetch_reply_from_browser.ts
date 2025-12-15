@@ -24,6 +24,9 @@ async function fetchPostReplies(page: Page) {
     }
     const res = await req.json();
     if (res.code !== 0) {
+      if (res.code === 12002) {
+        return res;
+      }
       await denoLog(
         `https://api.bilibili.com/x/v2/reply?oid=${missionInfo.oid}&type=${missionInfo.type}&pn=${pageNum}`,
       );
@@ -70,6 +73,12 @@ export async function fetchPostRepliesFromBrowser(
         const result = await fetchPostReplies(page);
         if (!result) {
           throw new Error(result);
+        }
+        if (result.code) {
+          if (result.code === 12002) {
+            console.log(`Post ${oid} doesn't have a comment area.`);
+          }
+          throw new Error(result.code);
         }
         hasMore = result.replies !== null;
         if (!hasMore) {
