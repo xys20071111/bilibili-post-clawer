@@ -47,6 +47,7 @@ export async function fetchPostRepliesFromBrowser(
   type: number,
   storage: Deno.Kv,
 ) {
+  console.log(`Fetching post ${oid}...`);
   await page.goto("https://www.bilibili.com");
   // 获取出错时，在deno中报错
   await page.exposeFunction("denoAlert", (text: string) => {
@@ -157,17 +158,29 @@ if (import.meta.main) {
     console.log("Generating exclude list...");
     (await genExcludeList(repliesStorage)).forEach((v) => excludeList.push(v));
   }
+  console.log(excludeList);
+  const postIds: Array<{
+    oid: string;
+    type: number;
+  }> = [];
   for await (const post of postList) {
     const parsedPost = parseDynamicItem(post.value as any);
     if (excludeList.includes(parsedPost.commentArea.commentId)) {
+      console.log(
+        `Post ${parsedPost.commentArea.commentId} already fetched, skipped...`,
+      );
       continue;
     }
-    await fetchPostRepliesFromBrowser(
-      page,
-      parsedPost.commentArea.commentId,
-      parsedPost.commentArea.commentType,
-      repliesStorage,
-    );
+    postIds.push({
+      oid: parsedPost.commentArea.commentId,
+      type: parsedPost.commentArea.commentType,
+    });
+  }
+  console.log(`Total task(s): ${postIds.length}`);
+  for (let i = 0; i < postIds.length; i++) {
+    console.log(`Progress: ${((i + 1) / postIds.length).toFixed(4)}%`);
+    const { oid, type } = postIds[i];
+    await fetchPostRepliesFromBrowser(page, oid, type, repliesStorage);
   }
   storage.close();
   await browser.close();
