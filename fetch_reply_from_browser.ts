@@ -96,6 +96,19 @@ export async function fetchPostRepliesFromBrowser(
   await page.reload();
 }
 
+async function genExcludeList(db: Deno.Kv) {
+  const oidSet: Set<string> = new Set();
+
+  for await (const item of db.list<any>({ prefix: ["reply"] })) {
+    oidSet.add(item!.value!.oid_str);
+  }
+
+  const oidList: string[] = [];
+
+  oidSet.forEach((v) => oidList.push(v));
+  return oidList;
+}
+
 if (import.meta.main) {
   const storage = await Deno.openKv("posts.kv");
   const repliesStorage = await Deno.openKv("replies.kv");
@@ -128,8 +141,16 @@ if (import.meta.main) {
     prefix: ["post"],
   });
   const page = await browser.newPage();
+  const excludeList: string[] = [];
+  if (Deno.env.get("USE_EXCLUDE")) {
+    console.log("Generating exclude list...");
+    (await genExcludeList(repliesStorage)).forEach((v) => excludeList.push(v));
+  }
   for await (const post of postList) {
     const parsedPost = parseDynamicItem(post.value as any);
+    if (excludeList.includes(parsedPost.commentArea.commentId)) {
+      continue;
+    }
     await fetchPostRepliesFromBrowser(
       page,
       parsedPost.commentArea.commentId,
