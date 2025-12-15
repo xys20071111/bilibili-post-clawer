@@ -77,6 +77,7 @@ export async function fetchPostRepliesFromBrowser(
         if (result.code) {
           if (result.code === 12002) {
             console.log(`Post ${oid} doesn't have a comment area.`);
+            hasMore = false;
             break;
           }
           throw new Error(result.code);
