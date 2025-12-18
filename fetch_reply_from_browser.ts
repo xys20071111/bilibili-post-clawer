@@ -1,132 +1,114 @@
 /// <reference lib="dom" />
 /// <reference lib="deno.unstable" />
 
-import puppeteer from "puppeteer-extra";
-import Stealth from "puppeteer-extra-plugin-stealth";
-import { sleep } from "./utils.ts";
-import { parseDynamicItem } from "./post_parser.ts";
-import { Page } from "puppeteer-core";
+import puppeteer from "puppeteer-extra"
+import Stealth from "puppeteer-extra-plugin-stealth"
+import { sleep } from "./utils.ts"
+import { parseDynamicItem } from "./post_parser.ts"
+import { Page } from "puppeteer-core"
 
-async function fetchPostReplies(page: Page) {
-  const result = await page.evaluate(async () => {
-    const missionInfo = await getReplyArea();
-    const pageNum = await getPageNum();
-    const url = `https://api.bilibili.com/x/v2/reply?oid=${missionInfo.oid}&type=${missionInfo.type}&pn=${pageNum}`;
-    console.log(url);
-    const req = await fetch(url, {
-      credentials: "include",
-    });
-    if (!req.ok) {
-      await denoAlert(
-        `request failed! Is your ip banned? currentOffset: ${JSON.stringify(missionInfo)} Code: ${req.status}`,
-      );
-      return null;
+async function fetchPostReplies() {
+  const { oid, type, pageNum } = JSON.parse('{{missionInfo}}')
+  const url = `https://api.bilibili.com/x/v2/reply?oid=${oid}&type=${type}&pn=${pageNum}`
+  const req = await fetch(url, {
+    credentials: "include",
+  })
+  if (!req.ok) {
+    await denoAlert(
+      `request failed! Is your ip banned? current oid: ${oid} Code: ${req.status}`,
+    )
+    return null
+  }
+  const res = await req.json()
+  if (res.code !== 0) {
+    if (res.code === 12002) {
+      return res
     }
-    const res = await req.json();
-    if (res.code !== 0) {
-      if (res.code === 12002) {
-        return res;
-      }
-      await denoLog(
-        `https://api.bilibili.com/x/v2/reply?oid=${missionInfo.oid}&type=${missionInfo.type}&pn=${pageNum}`,
-      );
-      await denoAlert(
-        `request failed! Maybe need pass a CAPTCHA? currentOffset: ${JSON.stringify(missionInfo)} Code: ${res.code}`,
-      );
-      return null;
-    }
-    const data = res.data;
-    return data;
-  });
-  return result;
+    await denoLog(
+      `https://api.bilibili.com/x/v2/reply?oid=${oid}&type=${type}&pn=${pageNum}`,
+    )
+    await denoAlert(
+      `request failed! Maybe need pass a CAPTCHA? current oid: ${oid} Code: ${res.code}`,
+    )
+    return null
+  }
+  const data = res.data
+  return data
 }
 
-export async function fetchPostRepliesFromBrowser(
+async function fetchPostRepliesFromBrowser(
   page: Page,
   oid: string,
   type: number,
   storage: Deno.Kv,
 ) {
-  console.log(`Fetching post ${oid}...`);
-  await page.goto("https://www.bilibili.com");
-  // 获取出错时，在deno中报错
-  await page.exposeFunction("denoAlert", (text: string) => {
-    alert(text);
-  });
-  await page.exposeFunction("denoLog", (...args: any[]) => {
-    console.log.apply(null, args);
-  });
-  //向页面提供当前的id
-  page.exposeFunction("getReplyArea", () => {
-    return {
-      oid,
-      type,
-    };
-  });
-  let pageNum = 1;
-  page.exposeFunction("getPageNum", () => {
-    return pageNum;
-  });
-  let hasMore = true;
+  console.log(`Fetching post ${oid}...`)
+  let pageNum = 1
+  let hasMore = true
   while (hasMore) {
     for (let i = 0; i < 5; i++) {
       try {
-        const result = await fetchPostReplies(page);
+        const functionBody = `
+(async () => {
+${fetchPostReplies.toString().replace("{{missionInfo}}", JSON.stringify({ oid, type, pageNum }))}
+return await fetchPostReplies()
+})()
+        `
+        const result: any = await page.evaluate(functionBody)
         if (!result) {
-          throw new Error(result);
+          throw new Error(result)
         }
         if (result.code) {
           if (result.code === 12002) {
-            console.log(`Post ${oid} doesn't have a comment area.`);
-            hasMore = false;
-            break;
+            console.log(`Post ${oid} doesn't have a comment area.`)
+            hasMore = false
+            break
           }
-          throw new Error(result.code);
+          throw new Error(result.code)
         }
-        hasMore = result.replies !== null;
+        hasMore = result.replies !== null
         if (!hasMore) {
-          console.log(`Post ${oid} fetched`);
-          break;
+          console.log(`Post ${oid} fetched`)
+          if (pageNum === 1) {
+            console.log(`Post ${oid} does not have any reply, add to exclude list.`)
+            await storage.set(['empty', oid], oid)
+          }
+          break
         }
         for (const item of result.replies) {
-          await storage.set(["reply", item.rpid], item);
+          await storage.set(["reply", item.rpid], item)
         }
-        break;
+        break
       } catch (e) {
-        console.error(`Retry fetching replies from ${oid} time(s): ${i}`);
-        console.error(e);
-        continue;
+        console.error(`Retry fetching replies from ${oid} time(s): ${i}`)
+        console.error(e)
+        continue
       }
     }
-    await sleep(1.5);
-    pageNum++;
+    await sleep(1.5)
+    pageNum++
   }
-  await page.removeExposedFunction("denoAlert");
-  await page.removeExposedFunction("denoLog");
-  await page.removeExposedFunction("getReplyArea");
-  await page.removeExposedFunction("getPageNum");
-  await page.reload();
 }
 
 async function genExcludeList(db: Deno.Kv) {
-  const oidSet: Set<string> = new Set();
+  const oidSet: Set<string> = new Set()
 
   for await (const item of db.list<any>({ prefix: ["reply"] })) {
-    oidSet.add(item!.value!.oid_str);
+    oidSet.add(item!.value!.oid_str)
   }
 
-  const oidList: string[] = [];
+  const oidList: string[] = []
 
-  oidSet.forEach((v) => oidList.push(v));
-  return oidList;
+  oidSet.forEach((v) => oidList.push(v))
+  return oidList
 }
 
 if (import.meta.main) {
-  const storage = await Deno.openKv("posts.kv");
-  const repliesStorage = await Deno.openKv("replies.kv");
-  puppeteer.default.use(Stealth());
+  const storage = await Deno.openKv("posts.kv")
+  const repliesStorage = await Deno.openKv("replies.kv")
+  puppeteer.default.use(Stealth())
   const browser = await puppeteer.default.launch({
-    headless: true,
+    headless: false,
     executablePath: Deno.env.get("CHROME_PATH") ?? "/usr/bin/google-chrome",
     userDataDir: "./browser-data",
     devtools: false,
@@ -148,40 +130,57 @@ if (import.meta.main) {
       "--disable-renderer-backgrounding",
       "--disable-device-discovery-notifications",
     ],
-  });
+  })
   const postList = storage.list({
     prefix: ["post"],
-  });
-  const page = await browser.newPage();
-  const excludeList: string[] = [];
+  })
+  const page = await browser.newPage()
+  const excludeList: string[] = []
+  // 生成排除清单
   if (Deno.env.get("USE_EXCLUDE")) {
     console.log("Generating exclude list...");
-    (await genExcludeList(repliesStorage)).forEach((v) => excludeList.push(v));
+    (await genExcludeList(repliesStorage)).forEach((v) => excludeList.push(v))
+    for await (const item of repliesStorage.list({ prefix: ['empty'] })) {
+      excludeList.push(item.key[1] as string)
+    }
   }
-  console.log(excludeList);
   const postIds: Array<{
-    oid: string;
-    type: number;
-  }> = [];
+    oid: string
+    type: number
+  }> = []
+  // 生成任务清单
   for await (const post of postList) {
-    const parsedPost = parseDynamicItem(post.value as any);
+    const parsedPost = parseDynamicItem(post.value as any)
     if (excludeList.includes(parsedPost.commentArea.commentId)) {
       console.log(
         `Post ${parsedPost.commentArea.commentId} already fetched, skipped...`,
-      );
-      continue;
+      )
+      continue
     }
     postIds.push({
       oid: parsedPost.commentArea.commentId,
       type: parsedPost.commentArea.commentType,
-    });
+    })
   }
-  console.log(`Total task(s): ${postIds.length}`);
-  for (let i = 0; i < postIds.length; i++) {
-    console.log(`Progress: ${((i + 1) / postIds.length).toFixed(4)}%`);
-    const { oid, type } = postIds[i];
-    await fetchPostRepliesFromBrowser(page, oid, type, repliesStorage);
+  const totalTaskCount = postIds.length
+  console.log(`Total task(s): ${totalTaskCount}`)
+  // 打开B站
+  await page.goto("https://www.bilibili.com")
+  // 获取出错时，在deno中报错
+  await page.exposeFunction("denoAlert", (text: string) => {
+    alert(text)
+  })
+  await page.exposeFunction("denoLog", (...args: any[]) => {
+    console.log.apply(null, args)
+  })
+  // 开始爬取
+  for (let i = 0; i < totalTaskCount; i++) {
+    console.log(
+      `Progress: ${i + 1}/${totalTaskCount} ${((i + 1) / totalTaskCount).toFixed(4)}%`,
+    )
+    const { oid, type } = postIds[i]
+    await fetchPostRepliesFromBrowser(page, oid, type, repliesStorage)
   }
-  storage.close();
-  await browser.close();
+  storage.close()
+  await browser.close()
 }

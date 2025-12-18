@@ -3,5 +3,9 @@
     "puppeteer-core": "npm:puppeteer-core@^24.20.0",
     "puppeteer-extra": "npm:puppeteer-extra@^3.3.6",
     "puppeteer-extra-plugin-stealth": "npm:puppeteer-extra-plugin-stealth@^2.11.2"
+  },
+  "fmt": {
+    "semiColons": false,
+    "singleQuote": true
   }
 }
