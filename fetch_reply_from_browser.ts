@@ -21,7 +21,7 @@ async function fetchPostReplies() {
   }
   const res = await req.json()
   if (res.code !== 0) {
-    if (res.code === 12002) {
+    if (res.code === 12002 && res.code === -400) {
       return res
     }
     await denoLog(
@@ -61,6 +61,11 @@ return await fetchPostReplies()
         if (result.code) {
           if (result.code === 12002) {
             console.log(`Post ${oid} doesn't have a comment area.`)
+            hasMore = false
+            break
+          }
+          if (result.code === -400) {
+            console.log(`Can't fetch more replies from post ${oid}, result may incomplete.`)
             hasMore = false
             break
           }
