@@ -113,7 +113,7 @@ if (import.meta.main) {
   const repliesStorage = await Deno.openKv("replies.kv")
   puppeteer.default.use(Stealth())
   const browser = await puppeteer.default.launch({
-    headless: false,
+    headless: Deno.env.get("HEADLESS") ? true : false,
     executablePath: Deno.env.get("CHROME_PATH") ?? "/usr/bin/google-chrome",
     userDataDir: "./browser-data",
     devtools: false,
