@@ -21,16 +21,7 @@ async function fetchPostReplies() {
   }
   const res = await req.json()
   if (res.code !== 0) {
-    if (res.code === 12002 || res.code === -400) {
-      return res
-    }
-    await denoLog(
-      `https://api.bilibili.com/x/v2/reply?oid=${oid}&type=${type}&pn=${pageNum}`,
-    )
-    await denoAlert(
-      `request failed! Maybe need pass a CAPTCHA? current oid: ${oid} Code: ${res.code}`,
-    )
-    return null
+    return res
   }
   const data = res.data
   return data
@@ -59,7 +50,7 @@ return await fetchPostReplies()
           throw new Error(result)
         }
         if (result.code) {
-          if (result.code === 12002) {
+          if (result.code === 12002 || result.code === 12061) {
             console.log(`Post ${oid} doesn't have a comment area.`)
             hasMore = false
             break
