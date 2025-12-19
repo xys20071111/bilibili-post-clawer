@@ -21,7 +21,7 @@ async function fetchPostReplies() {
   }
   const res = await req.json()
   if (res.code !== 0) {
-    if (res.code === 12002 && res.code === -400) {
+    if (res.code === 12002 || res.code === -400) {
       return res
     }
     await denoLog(
