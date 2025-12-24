@@ -1,0 +1,8 @@
+{
+    "midList": [],
+    "headless": true,
+    "browserDataPath": "./browser-data",
+    "stopAt": 1766555289,
+    "excludeFetched": true,
+    "chromePath": "/usr/bin/google-chrome"
+}

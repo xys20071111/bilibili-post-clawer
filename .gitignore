@@ -7,3 +7,4 @@ browser-data
 .theia
 
 !deno.json
+!config.example.json

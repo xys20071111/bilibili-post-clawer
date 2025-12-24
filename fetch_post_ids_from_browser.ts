@@ -6,6 +6,7 @@ import Stealth from "puppeteer-extra-plugin-stealth"
 import { Browser, type Page } from "puppeteer-core"
 import { sleep } from "./utils.ts"
 import { parseDynamicItem } from "./post_parser.ts"
+import { Config } from './config.ts'
 
 async function fetchPostIds() {
   const { mid, offset } = JSON.parse('{{missionInfo}}')
@@ -71,53 +72,4 @@ export async function fetchPostIdsFromBrowser(
     }
     await sleep(1.5)
   }
-}
-
-if (import.meta.main) {
-  const MID = Deno.env.get("MID") ?? "88271743"
-  const OFFSET = Deno.env.get("OFFSET") ?? ""
-  const STOP_AT = Deno.env.get("STOP_AT") ?? "0"
-  const storage = await Deno.openKv("posts.kv")
-  puppeteer.default.use(Stealth())
-  const browser: Browser = await puppeteer.default.launch({
-    headless: Deno.env.get("HEADLESS") ? true : false,
-    executablePath: Deno.env.get("CHROME_PATH") ?? "/usr/bin/google-chrome",
-    userDataDir: "./browser-data",
-    devtools: false,
-    defaultViewport: null,
-    pipe: true,
-    protocolTimeout: 30 * 60 * 60 * 1000,
-    args: [
-      "--disable-dev-shm-usage",
-      "--disable-gpu",
-      "--disable-background-networking",
-      "--disable-sync",
-      "--disable-translate",
-      "--hide-scrollbars",
-      "--mute-audio",
-      "--no-first-run",
-      "--no-default-browser-check",
-      "--disable-popup-blocking",
-      "--disable-background-timer-throttling",
-      "--disable-renderer-backgrounding",
-      "--disable-device-discovery-notifications",
-    ],
-  })
-  let stopAt = parseInt(STOP_AT)
-  if (isNaN(stopAt)) {
-    stopAt = 0
-  }
-  const page = await browser.newPage()
-  // 打开B站
-  await page.goto("https://www.bilibili.com")
-  // 获取出错时，在deno中报错
-  await page.exposeFunction("denoAlert", (text: string) => {
-    alert(text)
-  })
-  await page.exposeFunction("denoLog", (...args: any[]) => {
-    console.log.apply(null, args)
-  })
-  await fetchPostIdsFromBrowser(page, MID, stopAt, OFFSET, storage)
-  storage.close()
-  await browser.close()
 }

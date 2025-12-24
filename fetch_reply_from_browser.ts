@@ -6,6 +6,7 @@ import Stealth from "puppeteer-extra-plugin-stealth"
 import { sleep } from "./utils.ts"
 import { parseDynamicItem } from "./post_parser.ts"
 import { Page } from "puppeteer-core"
+import { Config } from './config.ts'
 
 async function fetchPostReplies() {
   const { oid, type, pageNum } = JSON.parse('{{missionInfo}}')
@@ -108,9 +109,9 @@ if (import.meta.main) {
   const repliesStorage = await Deno.openKv("replies.kv")
   puppeteer.default.use(Stealth())
   const browser = await puppeteer.default.launch({
-    headless: Deno.env.get("HEADLESS") ? true : false,
-    executablePath: Deno.env.get("CHROME_PATH") ?? "/usr/bin/google-chrome",
-    userDataDir: "./browser-data",
+    headless: Config.headless,
+    executablePath: Config.chromePath ?? "/usr/bin/google-chrome",
+    userDataDir: Config.browserDataPath ?? "./browser-data",
     devtools: false,
     defaultViewport: null,
     pipe: true,
@@ -137,7 +138,7 @@ if (import.meta.main) {
   const page = await browser.newPage()
   const excludeList: string[] = []
   // 生成排除清单
-  if (Deno.env.get("EXCLUDE_FETCHED")) {
+  if (Config.excludeFetched) {
     console.log("Generating exclude list...")
     for await (const item of repliesStorage.list({ prefix: ['fetched'] })) {
       excludeList.push(item.key[1] as string)
