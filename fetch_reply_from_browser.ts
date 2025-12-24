@@ -33,6 +33,10 @@ async function fetchPostRepliesFromBrowser(
   type: number,
   storage: Deno.Kv,
 ) {
+  if (!oid) {
+    console.error('I don\'t know why but it is an undefined here.')
+    return
+  }
   console.log(`Fetching post ${oid}...`)
   let pageNum = 1
   let hasMore = true
@@ -53,11 +57,13 @@ return await fetchPostReplies()
           if (result.code === 12002 || result.code === 12061) {
             console.log(`Post ${oid} doesn't have a comment area.`)
             hasMore = false
+            await storage.set(['fetched', oid], oid)
             break
           }
           if (result.code === -400) {
             console.log(`Can't fetch more replies from post ${oid}, result may incomplete.`)
             hasMore = false
+            await storage.set(['fetched', oid], oid)
             break
           }
           throw new Error(result.code)
@@ -66,13 +72,24 @@ return await fetchPostReplies()
         if (!hasMore) {
           console.log(`Post ${oid} fetched`)
           if (pageNum === 1) {
-            console.log(`Post ${oid} does not have any reply, add to exclude list.`)
-            await storage.set(['empty', oid], oid)
+            console.log(`Post ${oid} does not have any reply.`)
           }
+          await storage.set(['fetched', oid], oid)
           break
         }
         for (const item of result.replies) {
-          await storage.set(["reply", item.rpid], item)
+          await storage.set(["reply", item.rpid_str], {
+            rpid: item.rpid_str,
+            oid: item.oid_str,
+            oidType: item.type,
+            ctime: item.ctime,
+            uid: item.mid_str,
+            parent: item.parent_str,
+            nickname: item.member.uname,
+            content: item.content.message,
+            like: item.like,
+            replyControl: item.reply_control
+          })
         }
         break
       } catch (e) {
@@ -84,19 +101,6 @@ return await fetchPostReplies()
     await sleep(1.5)
     pageNum++
   }
-}
-
-async function genExcludeList(db: Deno.Kv) {
-  const oidSet: Set<string> = new Set()
-
-  for await (const item of db.list<any>({ prefix: ["reply"] })) {
-    oidSet.add(item!.value!.oid_str)
-  }
-
-  const oidList: string[] = []
-
-  oidSet.forEach((v) => oidList.push(v))
-  return oidList
 }
 
 if (import.meta.main) {
@@ -133,10 +137,9 @@ if (import.meta.main) {
   const page = await browser.newPage()
   const excludeList: string[] = []
   // 生成排除清单
-  if (Deno.env.get("USE_EXCLUDE")) {
-    console.log("Generating exclude list...");
-    (await genExcludeList(repliesStorage)).forEach((v) => excludeList.push(v))
-    for await (const item of repliesStorage.list({ prefix: ['empty'] })) {
+  if (Deno.env.get("EXCLUDE_FETCHED")) {
+    console.log("Generating exclude list...")
+    for await (const item of repliesStorage.list({ prefix: ['fetched'] })) {
       excludeList.push(item.key[1] as string)
     }
   }
@@ -148,9 +151,6 @@ if (import.meta.main) {
   for await (const post of postList) {
     const parsedPost = parseDynamicItem(post.value as any)
     if (excludeList.includes(parsedPost.commentArea.commentId)) {
-      console.log(
-        `Post ${parsedPost.commentArea.commentId} already fetched, skipped...`,
-      )
       continue
     }
     postIds.push({
@@ -172,7 +172,7 @@ if (import.meta.main) {
   // 开始爬取
   for (let i = 0; i < totalTaskCount; i++) {
     console.log(
-      `Progress: ${i + 1}/${totalTaskCount} ${((i + 1) / totalTaskCount).toFixed(4)}%`,
+      `Progress: ${i + 1}/${totalTaskCount} ${(((i + 1) / totalTaskCount) * 100).toFixed(4)}%`,
     )
     const { oid, type } = postIds[i]
     await fetchPostRepliesFromBrowser(page, oid, type, repliesStorage)
