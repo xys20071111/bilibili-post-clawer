@@ -3,13 +3,16 @@ import Stealth from 'puppeteer-extra-plugin-stealth'
 import { Browser } from 'puppeteer-core'
 import { fetchPostDetailsFromBrowser } from './fetch_post_details_from_browser.ts'
 import { fetchPostIdsFromBrowser } from './fetch_post_ids_from_browser.ts'
-import { parseDynamicItem } from './post_parser.ts'
+import { ParsedDynamicItem } from './post_parser.ts'
 import { Config } from './config.ts'
 
-let stopAt = Config.stopAt
+const stopAt = Config.stopAt
 console.log(`Will stop when post older than ${stopAt}`)
 
-const midList = Config.midList
+const sourceList: Array<{
+  name: string,
+  id: string
+}> = JSON.parse(Deno.readTextFileSync(Deno.args[1]))
 
 const storage = await Deno.openKv('posts.kv')
 puppeteer.default.use(Stealth())
@@ -35,6 +38,7 @@ const browser: Browser = await puppeteer.default.launch({
     '--disable-background-timer-throttling',
     '--disable-renderer-backgrounding',
     '--disable-device-discovery-notifications',
+    '--no-sandbox'
   ],
 })
 
@@ -49,14 +53,14 @@ await page.exposeFunction('denoLog', (...args: any[]) => {
   console.log.apply(null, args)
 })
 
-if (midList.length === 0) {
-  console.error('Need mid list.')
+if (sourceList.length === 0) {
+  console.error('Need source.')
   Deno.exit(1)
 }
 
-for (const mid of midList) {
-  console.log(`Current mid: ${mid}`)
-  await fetchPostIdsFromBrowser(page, mid, stopAt, '', storage)
+for (const source of sourceList) {
+  console.log(`Current target: ${source.name}`)
+  await fetchPostIdsFromBrowser(page, source.id, stopAt, '', storage)
 }
 
 const idIter = storage.list({
@@ -68,12 +72,12 @@ for await (const id of idIter) {
 }
 await fetchPostDetailsFromBrowser(page, storage, idList)
 
-const postIter = storage.list({
+const postIter = storage.list<ParsedDynamicItem>({
   prefix: ['post'],
 })
 const origIdList: Array<string> = []
 for await (const post of postIter) {
-  const parsedPost = parseDynamicItem(post.value as any)
+  const parsedPost = post.value
   if (parsedPost.type === 'forward' && parsedPost.originalPostId) {
     const origId = parsedPost.originalPostId
     const res = await storage.get(['postId', origId])
@@ -85,3 +89,4 @@ for await (const post of postIter) {
 }
 await fetchPostDetailsFromBrowser(page, storage, origIdList)
 await browser.close()
+await storage.close()

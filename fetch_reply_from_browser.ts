@@ -14,9 +14,9 @@ async function fetchPostReplies() {
   const req = await fetch(url, {
     credentials: "include",
   })
-  if (!req.ok) {
+  if (req.status === 412) {
     await denoAlert(
-      `request failed! Is your ip banned? current oid: ${oid} Code: ${req.status}`,
+      `Request failed, your ip was banned.`,
     )
     return null
   }
@@ -57,6 +57,12 @@ return await fetchPostReplies()
         if (result.code) {
           if (result.code === 12002 || result.code === 12061) {
             console.log(`Post ${oid} doesn't have a comment area.`)
+            hasMore = false
+            await storage.set(['fetched', oid], oid)
+            break
+          }
+          if (result.code === -404) {
+            console.log(`It's strange that this post doesn't have any reply and its code is -404`)
             hasMore = false
             await storage.set(['fetched', oid], oid)
             break
@@ -154,10 +160,12 @@ if (import.meta.main) {
     if (excludeList.includes(parsedPost.commentArea.commentId)) {
       continue
     }
-    postIds.push({
-      oid: parsedPost.commentArea.commentId,
-      type: parsedPost.commentArea.commentType,
-    })
+    if (parsedPost.commentArea.commentId) {
+      postIds.push({
+        oid: parsedPost.commentArea.commentId,
+        type: parsedPost.commentArea.commentType,
+      })
+    }
   }
   const totalTaskCount = postIds.length
   console.log(`Total task(s): ${totalTaskCount}`)

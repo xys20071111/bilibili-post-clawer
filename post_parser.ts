@@ -29,7 +29,6 @@ export interface ParsedDynamicItem {
   publishTime: number;
   publishTimeText: string;
   type: "forward" | "video" | "image" | "text" | "other";
-
   // Optional fields based on type
   originalPostId?: string; // For forwards
   videoInfo?: VideoInfo; // For videos
@@ -37,8 +36,8 @@ export interface ParsedDynamicItem {
   content?: string; // For text-only posts
   reserveInfo?: ReserveInfo; // For posts with a reservation
   commentArea: {
-    commentId: string;
-    commentType: number;
+    commentId?: string;
+    commentType?: number;
   };
 }
 

@@ -1,5 +1,4 @@
 interface Configuration {
-    midList: string[];
     chromePath?: string;
     browserDataPath: string;
     stopAt: number;

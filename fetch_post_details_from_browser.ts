@@ -7,6 +7,7 @@ import { type Page } from 'puppeteer-core'
 import { sleep } from './utils.ts'
 import { Browser } from 'puppeteer-core'
 import { Config } from './config.ts'
+import { parseDynamicItem } from './post_parser.ts'
 
 async function fetchPostDetails() {
   const id = await '{{id}}'
@@ -16,7 +17,7 @@ async function fetchPostDetails() {
       credentials: 'include',
     },
   )
-  if (!req.ok) {
+  if (req.status === 412) {
     await denoAlert(
       `request failed! Is your ip banned? currentId: ${id} Code: ${req.status}`,
     )
@@ -57,7 +58,7 @@ export async function fetchPostDetailsFromBrowser(
           };return await fetchPostDetails();})()`,
         )
         if (result.data) {
-          await storage.set(['post', id], result.data)
+          await storage.set(['post', id], parseDynamicItem(result.data))
         }
         if ([0, -1024, 4101152].includes(result.code)) {
           await storage.delete(['postId', id])
