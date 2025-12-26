@@ -6,9 +6,6 @@ import { fetchPostIdsFromBrowser } from './fetch_post_ids_from_browser.ts'
 import { ParsedDynamicItem } from './post_parser.ts'
 import { Config } from './config.ts'
 
-const stopAt = Config.stopAt
-console.log(`Will stop when post older than ${stopAt}`)
-
 const sourceList: Array<{
   name: string
   id: string
@@ -59,14 +56,9 @@ if (sourceList.length === 0) {
 }
 
 for (const source of sourceList) {
+  console.log(`Current target: ${source.name}`)
   const lastFetchDate = await storage.get<number>(['lastFetchDate', source.id])
-  if (
-    !lastFetchDate.value ||
-    Math.round(Date.now() / 1000) - lastFetchDate.value > 72 * 60 * 60
-  ) {
-    console.log(`Current target: ${source.name}`)
-    await fetchPostIdsFromBrowser(page, source.id, stopAt, '', storage)
-  }
+  await fetchPostIdsFromBrowser(page, source.id, lastFetchDate.value ? lastFetchDate.value : 0, '', storage)
 }
 
 const idIter = storage.list({

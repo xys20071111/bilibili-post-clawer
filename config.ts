@@ -1,7 +1,6 @@
 interface Configuration {
     chromePath?: string;
     browserDataPath: string;
-    stopAt: number;
     headless: boolean;
     excludeFetched: boolean;
 }
