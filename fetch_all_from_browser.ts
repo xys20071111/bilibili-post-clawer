@@ -10,7 +10,7 @@ const stopAt = Config.stopAt
 console.log(`Will stop when post older than ${stopAt}`)
 
 const sourceList: Array<{
-  name: string,
+  name: string
   id: string
 }> = JSON.parse(Deno.readTextFileSync(Deno.args[1]))
 
@@ -38,7 +38,7 @@ const browser: Browser = await puppeteer.default.launch({
     '--disable-background-timer-throttling',
     '--disable-renderer-backgrounding',
     '--disable-device-discovery-notifications',
-    '--no-sandbox'
+    '--no-sandbox',
   ],
 })
 
@@ -59,8 +59,14 @@ if (sourceList.length === 0) {
 }
 
 for (const source of sourceList) {
-  console.log(`Current target: ${source.name}`)
-  await fetchPostIdsFromBrowser(page, source.id, stopAt, '', storage)
+  const lastFetchDate = await storage.get<number>(['lastFetchDate', source.id])
+  if (
+    !lastFetchDate.value ||
+    Math.round(Date.now() / 1000) - lastFetchDate.value > 72 * 60 * 60
+  ) {
+    console.log(`Current target: ${source.name}`)
+    await fetchPostIdsFromBrowser(page, source.id, stopAt, '', storage)
+  }
 }
 
 const idIter = storage.list({

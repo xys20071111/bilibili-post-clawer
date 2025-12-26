@@ -72,4 +72,5 @@ export async function fetchPostIdsFromBrowser(
     }
     await sleep(1.5)
   }
+  await storage.set(['lastFetchDate', mid], Math.round(Date.now() / 1000))
 }
