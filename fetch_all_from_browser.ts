@@ -5,6 +5,7 @@ import { fetchPostDetailsFromBrowser } from './fetch_post_details_from_browser.t
 import { fetchPostIdsFromBrowser } from './fetch_post_ids_from_browser.ts'
 import { ParsedDynamicItem } from './post_parser.ts'
 import { Config } from './config.ts'
+import { sleep } from './utils.ts'
 
 const sourceList: Array<{
   name: string
@@ -59,6 +60,8 @@ for (const source of sourceList) {
   console.log(`Current target: ${source.name}`)
   const lastFetchDate = await storage.get<number>(['lastFetchDate', source.id])
   await fetchPostIdsFromBrowser(page, source.id, lastFetchDate.value ? lastFetchDate.value : 0, '', storage)
+  console.log('Fetch success, sleep 5 seconds...')
+  await sleep(5)
 }
 
 const idIter = storage.list({
