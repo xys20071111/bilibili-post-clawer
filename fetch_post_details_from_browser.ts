@@ -70,7 +70,7 @@ export async function fetchPostDetailsFromBrowser(
       }
     }
     // break
-    await sleep(1.5)
+    await sleep(3)
   }
 }
 
