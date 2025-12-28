@@ -2,6 +2,7 @@ interface Configuration {
     chromePath?: string;
     browserDataPath: string;
     headless: boolean;
+    doNotFetchIfFetchedInThreeDays: boolean;
     excludeFetched: boolean;
 }
 

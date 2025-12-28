@@ -59,9 +59,22 @@ if (sourceList.length === 0) {
 for (const source of sourceList) {
   console.log(`Current target: ${source.name}`)
   const lastFetchDate = await storage.get<number>(['lastFetchDate', source.id])
-  await fetchPostIdsFromBrowser(page, source.id, lastFetchDate.value ? lastFetchDate.value : 0, '', storage)
-  console.log('Fetch success, sleep 5 seconds...')
-  await sleep(5)
+  if (
+    Config.doNotFetchIfFetchedInThreeDays && lastFetchDate.value &&
+    Math.round(Date.now() / 1000) - lastFetchDate.value > 3 * 24 * 60 * 60
+  ) {
+    await fetchPostIdsFromBrowser(
+      page,
+      source.id,
+      lastFetchDate.value ? lastFetchDate.value : 0,
+      '',
+      storage,
+    )
+    console.log('Fetch success, sleep 5 seconds...')
+    await sleep(5)
+  } else {
+    console.log('Already fetched in last 3 days, skipped.')
+  }
 }
 
 const idIter = storage.list({
