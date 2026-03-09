@@ -57,7 +57,7 @@ if (sourceList.length === 0) {
 }
 
 for (const source of sourceList) {
-  console.log(`Current target: ${source.name}`)
+  console.log(`Current target: ${source.name || source.id}`)
   const lastFetchDate = await storage.get<number>(['lastFetchDate', source.id])
   if (
     Config.doNotFetchIfFetchedInThreeDays && lastFetchDate.value &&
