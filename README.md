@@ -19,15 +19,23 @@
 
 |配置项|类型|内容|
 |-|-|-|
-|midList|`string[]`|要爬取目标的uid|
 |chromePath|`string`|Chrome可执行文件的路径|
 |browserDataPath|`string`|`<你想把浏览器数据存到哪>`|
 |stop|`number`|截止时间戳，以秒为单位，遇到发布早于此时间的动态会停止爬取|
 |headless|`boolean`|是否启用无头模式|
 |excludeFetched|`boolean`|是否排除已爬取过的评论（只用于爬取评论区的脚本）|
 
+创建`source.json`
+
+```typescript
+Array<{
+  name: string // 可选，昵称
+  id: string //目标uid
+}>
+```
+
 ### 运行
-`deno run --allow-read=./,<Chrome可执行文件的路径> --allow-write=./ --allow-run --allow-sys --allow-net --unstable-kv <功能模块>`  
+`deno run --allow-read=./,<Chrome可执行文件的路径> --allow-write=./ --allow-run --allow-sys --allow-net --unstable-kv <功能模块> <path/to/config.json> <path/to/source.json>`  
 可用模块
 |模块名|作用|
 |-|-|
