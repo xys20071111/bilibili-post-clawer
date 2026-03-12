@@ -3,9 +3,10 @@ import Stealth from 'puppeteer-extra-plugin-stealth'
 import { Browser } from 'puppeteer-core'
 import { fetchPostDetailsFromBrowser } from './fetch_post_details_from_browser.ts'
 import { fetchPostIdsFromBrowser } from './fetch_post_ids_from_browser.ts'
-import { ParsedDynamicItem, parseDynamicItem } from './post_parser.ts'
+import { parseDynamicItem } from './post_parser.ts'
 import { Config } from './config.ts'
 import { sleep } from './utils.ts'
+import { db } from './db.ts'
 
 interface PostItem {
   id: string
@@ -43,9 +44,7 @@ const browser: Browser = await puppeteer.default.launch({
 })
 
 const page = await browser.newPage()
-// 打开B站
 await page.goto('https://www.bilibili.com')
-// 获取出错时，在deno中报错
 await page.exposeFunction('denoAlert', (text: string) => {
   alert(text)
 })
@@ -58,7 +57,6 @@ if (sourceList.length === 0) {
   Deno.exit(1)
 }
 
-// 获取动态列表
 for (const source of sourceList) {
   console.log(`Current target: ${source.name || source.id}`)
   const lastFetchDate = await storage.get<number>(['lastFetchDate', source.id])
@@ -80,7 +78,6 @@ for (const source of sourceList) {
   }
 }
 
-// 获取动态详情
 const idIter = storage.list<string>({
   prefix: ['postId'],
 })
@@ -91,19 +88,17 @@ for await (const id of idIter) {
     from: id.value
   })
 }
-await fetchPostDetailsFromBrowser(page, storage, idList)
+await db.connect()
+await fetchPostDetailsFromBrowser(page, storage, db, idList)
 
-// 检查一下是不是转发的，是的话获取原始动态
-const postIter = storage.list<any>({
-  prefix: ['post'],
-})
+const postIter = db.posts.find()
 const origIdList: Array<PostItem> = []
 for await (const post of postIter) {
-  const parsedPost = parseDynamicItem(post.value)
+  const parsedPost = parseDynamicItem(post.data)
   if (parsedPost.type === 'forward' && parsedPost.originalPostId) {
     const origId = parsedPost.originalPostId
-    const res = await storage.get(['postId', origId])
-    if (!res.value) {
+    const res = await db.getPostById(origId)
+    if (!res) {
       origIdList.push({
         id: origId,
         from: 'OriginalPoster'
@@ -112,8 +107,8 @@ for await (const post of postIter) {
     }
   }
 }
-await fetchPostDetailsFromBrowser(page, storage, origIdList)
+await fetchPostDetailsFromBrowser(page, storage, db, origIdList)
 
-// 清理，退出，之后就可以去跑获取评论的脚本了
 await browser.close()
 await storage.close()
+await db.close()

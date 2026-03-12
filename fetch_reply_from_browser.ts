@@ -7,6 +7,7 @@ import { sleep } from "./utils.ts"
 import { parseDynamicItem } from "./post_parser.ts"
 import { Page } from "puppeteer-core"
 import { Config } from './config.ts'
+import { db } from './db.ts'
 
 async function fetchPostReplies() {
   const { oid, type, pageNum } = JSON.parse('{{missionInfo}}')
@@ -32,7 +33,6 @@ async function fetchPostRepliesFromBrowser(
   page: Page,
   oid: string,
   type: number,
-  storage: Deno.Kv,
 ) {
   if (!oid) {
     console.error('I don\'t know why but it is an undefined here.')
@@ -58,19 +58,19 @@ return await fetchPostReplies()
           if (result.code === 12002 || result.code === 12061) {
             console.log(`Post ${oid} doesn't have a comment area.`)
             hasMore = false
-            await storage.set(['fetched', oid], oid)
+            await db.markPostAsFetched(oid)
             break
           }
           if (result.code === -404) {
             console.log(`It's strange that this post doesn't have any reply and its code is -404`)
             hasMore = false
-            await storage.set(['fetched', oid], oid)
+            await db.markPostAsFetched(oid)
             break
           }
           if (result.code === -400) {
             console.log(`Can't fetch more replies from post ${oid}, result may incomplete.`)
             hasMore = false
-            await storage.set(['fetched', oid], oid)
+            await db.markPostAsFetched(oid)
             break
           }
           throw new Error(result.code)
@@ -81,11 +81,11 @@ return await fetchPostReplies()
           if (pageNum === 1) {
             console.log(`Post ${oid} does not have any reply.`)
           }
-          await storage.set(['fetched', oid], oid)
+          await db.markPostAsFetched(oid)
           break
         }
         for (const item of result.replies) {
-          await storage.set(["reply", item.rpid_str], {
+          await db.saveReply({
             rpid: item.rpid_str,
             oid: item.oid_str,
             oidType: item.type,
@@ -112,7 +112,6 @@ return await fetchPostReplies()
 
 if (import.meta.main) {
   const storage = await Deno.openKv(Config.dbName)
-  const repliesStorage = await Deno.openKv(`${Config.dbName}_replies.sqlite3`)
   puppeteer.default.use(Stealth())
   const browser = await puppeteer.default.launch({
     headless: Config.headless,
@@ -138,54 +137,48 @@ if (import.meta.main) {
       "--disable-device-discovery-notifications",
     ],
   })
-  const postList = storage.list({
-    prefix: ["post"],
-  })
+  await db.connect()
+  const postList = db.posts.find()
   const page = await browser.newPage()
   const excludeList: string[] = []
-  // 生成排除清单
   if (Config.excludeFetched) {
     console.log("Generating exclude list...")
-    for await (const item of repliesStorage.list({ prefix: ['fetched'] })) {
-      excludeList.push(item.key[1] as string)
-    }
+    const fetchedList = await db.getAllFetchedPosts()
+    excludeList.push(...fetchedList)
   }
   const postIds: Array<{
     oid: string
     type: number
   }> = []
-  // 生成任务清单
   for await (const post of postList) {
-    const parsedPost = parseDynamicItem(post.value as any)
-    if (excludeList.includes(parsedPost.commentArea.commentId)) {
+    const parsedPost = parseDynamicItem(post.data as any)
+    if (excludeList.includes(parsedPost.commentArea.commentId!)) {
       continue
     }
     if (parsedPost.commentArea.commentId) {
       postIds.push({
         oid: parsedPost.commentArea.commentId,
-        type: parsedPost.commentArea.commentType,
+        type: parsedPost.commentArea.commentType!,
       })
     }
   }
   const totalTaskCount = postIds.length
   console.log(`Total task(s): ${totalTaskCount}`)
-  // 打开B站
   await page.goto("https://www.bilibili.com")
-  // 获取出错时，在deno中报错
   await page.exposeFunction("denoAlert", (text: string) => {
     alert(text)
   })
   await page.exposeFunction("denoLog", (...args: any[]) => {
     console.log.apply(null, args)
   })
-  // 开始爬取
   for (let i = 0; i < totalTaskCount; i++) {
     console.log(
       `Progress: ${i + 1}/${totalTaskCount} ${(((i + 1) / totalTaskCount) * 100).toFixed(4)}%`,
     )
     const { oid, type } = postIds[i]
-    await fetchPostRepliesFromBrowser(page, oid, type, repliesStorage)
+    await fetchPostRepliesFromBrowser(page, oid, type)
   }
-  storage.close()
+  await storage.close()
   await browser.close()
+  await db.close()
 }

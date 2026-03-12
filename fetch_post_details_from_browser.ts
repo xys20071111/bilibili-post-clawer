@@ -4,6 +4,7 @@
 import { type Page } from 'puppeteer-core'
 import { sleep } from './utils.ts'
 import { parseDynamicItem } from './post_parser.ts'
+import { MongoDB } from './db.ts'
 
 async function fetchPostDetails() {
   const id = await '{{id}}'
@@ -36,13 +37,14 @@ async function fetchPostDetails() {
 export async function fetchPostDetailsFromBrowser(
   page: Page,
   storage: Deno.Kv,
+  db: MongoDB,
   postInfo: Array<{
     id: string
     from: string
   }>,
 ) {
   for (const post of postInfo) {
-    if ((await storage.get(['post', post.id])).value) {
+    if (await db.postExists(post.id)) {
       console.log(`${post} already fetched, pass...`)
       await storage.delete(['postId', post.id])
       continue
@@ -57,8 +59,7 @@ export async function fetchPostDetailsFromBrowser(
         )
         if (result.data) {
           const paresdData = parseDynamicItem(result.data.item)
-          //还是存原始数据吧，大点就大点
-          await storage.set(['post', post.id], result.data.item)
+          await db.savePost(post.id, post.from, result.data.item)
           console.log(`Post ${post.id} posted by ${paresdData.author.name} fetched.`)
         } else if ([0, -1024, 4101152].includes(result.code)) {
           await storage.delete(['postId', post.id])
@@ -71,8 +72,6 @@ export async function fetchPostDetailsFromBrowser(
         console.error(`Retry fetching ${post.id} time(s): ${i}`)
       }
     }
-    // For debug.
-    // break
     await sleep(3)
   }
 }

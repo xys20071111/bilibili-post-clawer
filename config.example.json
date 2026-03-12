@@ -1,8 +1,17 @@
 {
-    "midList": [],
-    "headless": true,
-    "browserDataPath": "./browser-data",
-    "stopAt": 1766555289,
-    "excludeFetched": true,
-    "chromePath": "/usr/bin/google-chrome"
+  "sources": [],
+  "headless": true,
+  "browserDataPath": "./browser-data",
+  "doNotFetchIfFetchedInThreeDays": true,
+  "excludeFetched": true,
+  "dbName": "mihoyo",
+  "mongodb": {
+    "uri": "mongodb://localhost:27017",
+    "database": "bilibili_feed",
+    "collections": {
+      "posts": "posts",
+      "replies": "replies",
+      "fetchedPosts": "fetched_posts"
+    }
+  }
 }
