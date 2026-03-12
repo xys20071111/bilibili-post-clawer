@@ -1,8 +1,9 @@
-import { parseDynamicItem } from "./post_parser.ts";
+import { Config } from './config.ts';
+import { parseDynamicItem } from './post_parser.ts'
 
 if (import.meta.main) {
   const encoder = new TextEncoder();
-  const storage = await Deno.openKv("posts.kv");
+  const storage = await Deno.openKv(`${Config.dbName}.sqlite3`);
   const output = await Deno.open("./result.jsonl", {
     create: true,
     write: true,
@@ -11,8 +12,7 @@ if (import.meta.main) {
     prefix: ["post"],
   });
   for await (const post of postList) {
-    const parsedPost = parseDynamicItem(post.value as any);
-    await output.write(encoder.encode(`${JSON.stringify(parsedPost)}\n`));
+    await output.write(encoder.encode(`${JSON.stringify(parseDynamicItem(post.value))}\n`));
   }
   storage.close();
   output.close();

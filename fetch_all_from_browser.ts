@@ -3,16 +3,18 @@ import Stealth from 'puppeteer-extra-plugin-stealth'
 import { Browser } from 'puppeteer-core'
 import { fetchPostDetailsFromBrowser } from './fetch_post_details_from_browser.ts'
 import { fetchPostIdsFromBrowser } from './fetch_post_ids_from_browser.ts'
-import { ParsedDynamicItem } from './post_parser.ts'
+import { ParsedDynamicItem, parseDynamicItem } from './post_parser.ts'
 import { Config } from './config.ts'
 import { sleep } from './utils.ts'
 
-const sourceList: Array<{
-  name: string
+interface PostItem {
   id: string
-}> = JSON.parse(Deno.readTextFileSync(Deno.args[1]))
+  from: string
+}
 
-const storage = await Deno.openKv('posts.kv')
+const sourceList = Config.sources
+
+const storage = await Deno.openKv(`${Config.dbName}.sqlite3`)
 puppeteer.default.use(Stealth())
 const browser: Browser = await puppeteer.default.launch({
   headless: Config.headless,
@@ -56,6 +58,7 @@ if (sourceList.length === 0) {
   Deno.exit(1)
 }
 
+// 获取动态列表
 for (const source of sourceList) {
   console.log(`Current target: ${source.name || source.id}`)
   const lastFetchDate = await storage.get<number>(['lastFetchDate', source.id])
@@ -67,7 +70,7 @@ for (const source of sourceList) {
   } else {
     await fetchPostIdsFromBrowser(
       page,
-      source.id,
+      source,
       lastFetchDate.value ? lastFetchDate.value : 0,
       '',
       storage,
@@ -77,30 +80,40 @@ for (const source of sourceList) {
   }
 }
 
-const idIter = storage.list({
+// 获取动态详情
+const idIter = storage.list<string>({
   prefix: ['postId'],
 })
-const idList: Array<string> = []
+const idList: Array<PostItem> = []
 for await (const id of idIter) {
-  idList.push(id.key[1] as string)
+  idList.push({
+    id: id.key[1] as string,
+    from: id.value
+  })
 }
 await fetchPostDetailsFromBrowser(page, storage, idList)
 
-const postIter = storage.list<ParsedDynamicItem>({
+// 检查一下是不是转发的，是的话获取原始动态
+const postIter = storage.list<any>({
   prefix: ['post'],
 })
-const origIdList: Array<string> = []
+const origIdList: Array<PostItem> = []
 for await (const post of postIter) {
-  const parsedPost = post.value
+  const parsedPost = parseDynamicItem(post.value)
   if (parsedPost.type === 'forward' && parsedPost.originalPostId) {
     const origId = parsedPost.originalPostId
     const res = await storage.get(['postId', origId])
     if (!res.value) {
-      origIdList.push(origId)
+      origIdList.push({
+        id: origId,
+        from: 'OriginalPoster'
+      })
       await storage.set(['postId', origId], '')
     }
   }
 }
 await fetchPostDetailsFromBrowser(page, storage, origIdList)
+
+// 清理，退出，之后就可以去跑获取评论的脚本了
 await browser.close()
 await storage.close()

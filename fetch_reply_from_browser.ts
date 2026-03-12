@@ -111,8 +111,8 @@ return await fetchPostReplies()
 }
 
 if (import.meta.main) {
-  const storage = await Deno.openKv("posts.kv")
-  const repliesStorage = await Deno.openKv("replies.kv")
+  const storage = await Deno.openKv(Config.dbName)
+  const repliesStorage = await Deno.openKv(`${Config.dbName}_replies.sqlite3`)
   puppeteer.default.use(Stealth())
   const browser = await puppeteer.default.launch({
     headless: Config.headless,

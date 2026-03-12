@@ -1,12 +1,9 @@
 /// <reference lib="dom" />
 /// <reference lib="deno.unstable" />
 
-import puppeteer from "puppeteer-extra"
-import Stealth from "puppeteer-extra-plugin-stealth"
-import { Browser, type Page } from "puppeteer-core"
+import { type Page } from "puppeteer-core"
 import { sleep } from "./utils.ts"
 import { parseDynamicItem } from "./post_parser.ts"
-import { Config } from './config.ts'
 
 async function fetchPostIds() {
   const { mid, offset } = JSON.parse('{{missionInfo}}')
@@ -32,7 +29,10 @@ async function fetchPostIds() {
 
 export async function fetchPostIdsFromBrowser(
   page: Page,
-  mid: string,
+  source: {
+    name: string
+    id: string
+  },
   stopAt: number,
   baseOffset: string,
   storage: Deno.Kv,
@@ -40,11 +40,12 @@ export async function fetchPostIdsFromBrowser(
   let hasMore = true
   let currentOffset = baseOffset
   while (hasMore) {
+    console.log(`[${source.name ? source.name : source.id}] Current Offset: ${currentOffset}`)
     for (let i = 0; i < 5; i++) {
       try {
         const result: any = await page.evaluate(`
           (async () => {
-            ${fetchPostIds.toString().replace('{{missionInfo}}', JSON.stringify({ mid, offset: currentOffset }))};
+            ${fetchPostIds.toString().replace('{{missionInfo}}', JSON.stringify({ mid: source.id, offset: currentOffset }))};
             return await fetchPostIds()
           })()`)
         if (result.code) {
@@ -61,7 +62,7 @@ export async function fetchPostIdsFromBrowser(
             console.log(`Post ${id} older than ${stopAt}, stop fetching!`)
             return
           }
-          await storage.set(["postId", id], item.type)
+          await storage.set(["postId", id], source.name ? source.name : source.id)
         }
         break
       } catch (e) {
@@ -70,7 +71,9 @@ export async function fetchPostIdsFromBrowser(
         continue
       }
     }
+    // For debug.
+    // break
     await sleep(3)
   }
-  await storage.set(['lastFetchDate', mid], Math.round(Date.now() / 1000))
+  await storage.set(['lastFetchDate', source.id], Math.round(Date.now() / 1000))
 }

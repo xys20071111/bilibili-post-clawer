@@ -19,20 +19,13 @@
 
 |配置项|类型|内容|
 |-|-|-|
-|chromePath|`string`|Chrome可执行文件的路径|
-|browserDataPath|`string`|`<你想把浏览器数据存到哪>`|
-|stop|`number`|截止时间戳，以秒为单位，遇到发布早于此时间的动态会停止爬取|
+|chromePath|`string` (可选)|Chrome 可执行文件的路径|
+|browserDataPath|`string`|浏览器数据目录路径|
 |headless|`boolean`|是否启用无头模式|
-|excludeFetched|`boolean`|是否排除已爬取过的评论（只用于爬取评论区的脚本）|
-
-创建`source.json`
-
-```typescript
-Array<{
-  name: string // 可选，昵称
-  id: string //目标uid
-}>
-```
+|doNotFetchIfFetchedInThreeDays|`boolean`|是否跳过 3 天内已爬取的目标|
+|excludeFetched|`boolean`|是否排除已爬取过的评论|
+|dbName|`string`|数据库名称|
+|sources|`array`|数据源列表，包含 `name`(昵称) 和 `id`(目标 uid)|
 
 ### 运行
 `deno run --allow-read=./,<Chrome可执行文件的路径> --allow-write=./ --allow-run --allow-sys --allow-net --unstable-kv <功能模块> <path/to/config.json> <path/to/source.json>`  

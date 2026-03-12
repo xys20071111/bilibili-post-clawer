@@ -1,12 +1,8 @@
 /// <reference lib="dom" />
 /// <reference lib="deno.unstable" />
 
-import puppeteer from 'puppeteer-extra'
-import Stealth from 'puppeteer-extra-plugin-stealth'
 import { type Page } from 'puppeteer-core'
 import { sleep } from './utils.ts'
-import { Browser } from 'puppeteer-core'
-import { Config } from './config.ts'
 import { parseDynamicItem } from './post_parser.ts'
 
 async function fetchPostDetails() {
@@ -34,91 +30,49 @@ async function fetchPostDetails() {
     )
     return res
   }
-  const data = res.data.item
-  return data
+  return res
 }
 
 export async function fetchPostDetailsFromBrowser(
   page: Page,
   storage: Deno.Kv,
-  idList: Array<string>,
+  postInfo: Array<{
+    id: string
+    from: string
+  }>,
 ) {
-  for (const id of idList) {
-    if ((await storage.get(['post', id])).value) {
-      console.log(`${id} already fetched, pass...`)
-      await storage.delete(['postId', id])
+  for (const post of postInfo) {
+    if ((await storage.get(['post', post.id])).value) {
+      console.log(`${post} already fetched, pass...`)
+      await storage.delete(['postId', post.id])
       continue
     }
     for (let i = 0; i < 5; i++) {
       try {
-        console.log(`fetching ${id}`)
-        const result: any = page.evaluate(
+        console.log(`fetching ${post.id} posted by ${post.from}`)
+        const result: any = await page.evaluate(
           `(async () => {${
-            fetchPostDetails.toString().replace('{{id}}', id)
+            fetchPostDetails.toString().replace('{{id}}', post.id)
           };return await fetchPostDetails();})()`,
         )
         if (result.data) {
-          await storage.set(['post', id], parseDynamicItem(result.data))
-        }
-        if ([0, -1024, 4101152].includes(result.code)) {
-          await storage.delete(['postId', id])
+          const paresdData = parseDynamicItem(result.data.item)
+          //还是存原始数据吧，大点就大点
+          await storage.set(['post', post.id], result.data.item)
+          console.log(`Post ${post.id} posted by ${paresdData.author.name} fetched.`)
+        } else if ([0, -1024, 4101152].includes(result.code)) {
+          await storage.delete(['postId', post.id])
+        } else {
+          console.log("Please check up your code!")
         }
         break
       } catch (e) {
         console.log(e)
-        console.error(`Retry fetching ${id} time(s): ${i}`)
+        console.error(`Retry fetching ${post.id} time(s): ${i}`)
       }
     }
+    // For debug.
     // break
     await sleep(3)
   }
-}
-
-if (import.meta.main) {
-  puppeteer.default.use(Stealth())
-  const browser: Browser = await puppeteer.default.launch({
-    headless: Config.headless,
-    executablePath: Config.chromePath ?? '/usr/bin/google-chrome',
-    userDataDir: Config.browserDataPath ?? './browser-data',
-    devtools: false,
-    defaultViewport: null,
-    pipe: true,
-    protocolTimeout: 30 * 60 * 60 * 1000,
-    args: [
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
-      '--disable-background-networking',
-      '--disable-sync',
-      '--disable-translate',
-      '--hide-scrollbars',
-      '--mute-audio',
-      '--no-first-run',
-      '--no-default-browser-check',
-      '--disable-popup-blocking',
-      '--disable-background-timer-throttling',
-      '--disable-renderer-backgrounding',
-      '--disable-device-discovery-notifications',
-    ],
-  })
-  const storage = await Deno.openKv('posts.kv')
-  const idIter = storage.list({
-    prefix: ['postId'],
-  })
-  const idList: Array<string> = []
-  for await (const id of idIter) {
-    idList.push(id.key[1] as string)
-  }
-  const page = await browser.newPage()
-  // 打开B站
-  await page.goto('https://www.bilibili.com')
-  // 获取出错时，在deno中报错
-  await page.exposeFunction('denoAlert', (text: string) => {
-    alert(text)
-  })
-  await page.exposeFunction('denoLog', (...args: any[]) => {
-    console.log.apply(null, args)
-  })
-  await fetchPostDetailsFromBrowser(page, storage, idList)
-  storage.close()
-  await browser.close()
 }

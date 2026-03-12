@@ -1,7 +1,11 @@
 *.json*
 *.kv*
+*.sqlite*
+*.db*
 .env
 browser-data
+configs
+dbs
 
 .vscode
 .theia
