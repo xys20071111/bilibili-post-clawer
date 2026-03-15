@@ -46,7 +46,7 @@ if (import.meta.main) {
         console.log.apply(null, args)
     })
     
-    const postIter = db.posts.find()
+    const postIter = db.posts.find({}, { noCursorTimeout: true })
     const idList: Array<string> = []
     for await (const post of postIter) {
         const parsedPost = parseDynamicItem(post.data)

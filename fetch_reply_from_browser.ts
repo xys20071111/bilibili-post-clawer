@@ -36,10 +36,10 @@ async function fetchPostRepliesFromBrowser(
   storage: Deno.Kv,
 ) {
   if (!oid) {
-    console.error('I don\'t know why but it is an undefined here.')
+    console.error('oid 未定义，原因未知。')
     return
   }
-  console.log(`Fetching post ${oid}...`)
+  console.log(`正在获取动态 ${oid} 的评论...`)
   let pageNum = 1
   let hasMore = true
   while (hasMore) {
@@ -57,19 +57,19 @@ return await fetchPostReplies()
         }
         if (result.code) {
           if (result.code === 12002 || result.code === 12061) {
-            console.log(`Post ${oid} doesn't have a comment area.`)
+            console.log(`动态 ${oid} 没有评论区。`)
             hasMore = false
             await storage.set(['fetched', oid], oid)
             break
           }
           if (result.code === -404) {
-            console.log(`It's strange that this post doesn't have any reply and its code is -404`)
+            console.log(`动态 ${oid} 没有评论，返回码为 -404`)
             hasMore = false
             await storage.set(['fetched', oid], oid)
             break
           }
           if (result.code === -400) {
-            console.log(`Can't fetch more replies from post ${oid}, result may incomplete.`)
+            console.log(`无法获取动态 ${oid} 的更多评论，结果可能不完整。`)
             hasMore = false
             await storage.set(['fetched', oid], oid)
             break
@@ -78,9 +78,9 @@ return await fetchPostReplies()
         }
         hasMore = result.replies !== null
         if (!hasMore) {
-          console.log(`Post ${oid} fetched`)
+          console.log(`动态 ${oid} 评论获取完成`)
           if (pageNum === 1) {
-            console.log(`Post ${oid} does not have any reply.`)
+            console.log(`动态 ${oid} 没有评论。`)
           }
           await storage.set(['fetched', oid], oid)
           break
@@ -101,7 +101,7 @@ return await fetchPostReplies()
         }
         break
       } catch (e) {
-        console.error(`Retry fetching replies from ${oid} time(s): ${i}`)
+        console.error(`重试获取动态 ${oid} 的评论，第 ${i} 次`)
         console.error(e)
         continue
       }
@@ -139,11 +139,11 @@ if (import.meta.main) {
     ],
   })
   await db.connect()
-  const postList = db.posts.find()
+  const postList = db.posts.find({}, { noCursorTimeout: true })
   const page = await browser.newPage()
   const excludeList: string[] = []
   if (Config.excludeFetched) {
-    console.log("Generating exclude list...")
+    console.log("正在生成排除列表...")
     for await (const item of storage.list({ prefix: ['fetched'] })) {
       excludeList.push(item.key[1] as string)
     }
@@ -165,7 +165,7 @@ if (import.meta.main) {
     }
   }
   const totalTaskCount = postIds.length
-  console.log(`Total task(s): ${totalTaskCount}`)
+  console.log(`总任务数：${totalTaskCount}`)
   await page.goto("https://www.bilibili.com")
   await page.exposeFunction("denoAlert", (text: string) => {
     alert(text)
@@ -175,7 +175,7 @@ if (import.meta.main) {
   })
   for (let i = 0; i < totalTaskCount; i++) {
     console.log(
-      `Progress: ${i + 1}/${totalTaskCount} ${(((i + 1) / totalTaskCount) * 100).toFixed(4)}%`,
+      `进度：${i + 1}/${totalTaskCount} ${(((i + 1) / totalTaskCount) * 100).toFixed(4)}%`,
     )
     const { oid, type } = postIds[i]
     await fetchPostRepliesFromBrowser(page, oid, type, storage)

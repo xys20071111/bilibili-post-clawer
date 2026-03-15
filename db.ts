@@ -63,7 +63,7 @@ export class MongoDB {
   }
 
   async getAllPosts(): Promise<PostDocument[]> {
-    return await this.posts.find().toArray()
+    return await this.posts.find({}, { noCursorTimeout: true }).toArray()
   }
 
   async getPostById(id: string): Promise<PostDocument | null> {

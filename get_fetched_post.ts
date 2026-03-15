@@ -9,7 +9,7 @@ if (import.meta.main) {
     create: true,
     write: true,
   });
-  const postList = db.posts.find()
+  const postList = db.posts.find({}, { noCursorTimeout: true })
   for await (const post of postList) {
     await output.write(encoder.encode(`${JSON.stringify(parseDynamicItem(post.data))}\n`));
   }

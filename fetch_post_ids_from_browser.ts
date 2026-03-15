@@ -40,7 +40,7 @@ export async function fetchPostIdsFromBrowser(
   let hasMore = true
   let currentOffset = baseOffset
   while (hasMore) {
-    console.log(`[${source.name ? source.name : source.id}] Current Offset: ${currentOffset}`)
+    console.log(`[${source.name ? source.name : source.id}] 当前偏移：${currentOffset}`)
     for (let i = 0; i < 5; i++) {
       try {
         const result: any = await page.evaluate(`
@@ -59,14 +59,14 @@ export async function fetchPostIdsFromBrowser(
           const id = parsedPost.id
           const publishTime = parsedPost.publishTime
           if (publishTime < stopAt) {
-            console.log(`Post ${id} older than ${stopAt}, stop fetching!`)
+            console.log(`动态 ${id} 发布时间早于 ${stopAt}，停止获取！`)
             return
           }
           await storage.set(["postId", id], source.name ? source.name : source.id)
         }
         break
       } catch (e) {
-        console.error(`Retry fetching offset ${currentOffset} time(s): ${i}`)
+        console.error(`重试获取迭代 ${currentOffset}，第 ${i} 次`)
         console.error(e)
         continue
       }

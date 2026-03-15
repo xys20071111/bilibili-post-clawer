@@ -5,6 +5,7 @@ import { type Page } from 'puppeteer-core'
 import { sleep } from './utils.ts'
 import { parseDynamicItem } from './post_parser.ts'
 import { MongoDB } from './db.ts'
+import { MongoServerError } from 'mongodb'
 
 async function fetchPostDetails() {
   const id = await '{{id}}'
@@ -46,7 +47,7 @@ export async function fetchPostDetailsFromBrowser(
   for (const post of postInfo) {
     for (let i = 0; i < 5; i++) {
       try {
-        console.log(`fetching ${post.id} posted by ${post.from}`)
+        console.log(`正在获取 ${post.from} 发布的动态 ${post.id}`)
         const result: any = await page.evaluate(
           `(async () => {${
             fetchPostDetails.toString().replace('{{id}}', post.id)
@@ -55,17 +56,21 @@ export async function fetchPostDetailsFromBrowser(
         if (result.data) {
           const paresdData = parseDynamicItem(result.data.item)
           await db.savePost(post.id, post.from, result.data.item)
-          console.log(`Post ${post.id} posted by ${paresdData.author.name} fetched.`)
+          console.log(`已获取 ${paresdData.author.name} 发布的动态 ${post.id}`)
           await storage.delete(['postId', post.id])
         } else if ([0, -1024, 4101152].includes(result.code)) {
           await storage.delete(['postId', post.id])
         } else {
-          console.log("Please check up your code!")
+          console.log("请检查代码！")
         }
         break
       } catch (e) {
+        if (e instanceof MongoServerError && e.message === 'Duplicate key violation on the requested collection: Index \'id_1\'') {
+          console.log(`去重功能疑似失效，出现了重复的爬取: ${post.id}`)
+          break
+        }
         console.log(e)
-        console.error(`Retry fetching ${post.id} time(s): ${i}`)
+        console.error(`重试获取 ${post.id}，第 ${i} 次`)
       }
     }
     await sleep(3)

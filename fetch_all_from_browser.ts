@@ -53,18 +53,18 @@ await page.exposeFunction('denoLog', (...args: any[]) => {
 })
 
 if (sourceList.length === 0) {
-  console.error('Need source.')
+  console.error('未配置来源。')
   Deno.exit(1)
 }
 
 for (const source of sourceList) {
-  console.log(`Current target: ${source.name || source.id}`)
+  console.log(`当前目标：${source.name || source.id}`)
   const lastFetchDate = await storage.get<number>(['lastFetchDate', source.id])
   if (
     Config.doNotFetchIfFetchedInThreeDays && lastFetchDate.value &&
     Math.round(Date.now() / 1000) - lastFetchDate.value < 3 * 24 * 60 * 60
   ) {
-    console.log('Already fetched in last 3 days, skipped.')
+    console.log('过去 3 天内已获取，跳过。')
   } else {
     await fetchPostIdsFromBrowser(
       page,
@@ -73,7 +73,7 @@ for (const source of sourceList) {
       '',
       storage,
     )
-    console.log('Fetch success, sleep 5 seconds...')
+    console.log('获取成功，等待 5 秒...')
     await sleep(5)
   }
 }
@@ -91,7 +91,7 @@ for await (const id of idIter) {
 await db.connect()
 await fetchPostDetailsFromBrowser(page, storage, db, idList)
 
-const postIter = db.posts.find()
+const postIter = db.posts.find({}, { noCursorTimeout: true, batchSize: 50 })
 const origIdList: Array<PostItem> = []
 for await (const post of postIter) {
   const parsedPost = parseDynamicItem(post.data)
