@@ -8,6 +8,8 @@ import { Config } from './config.ts'
 import { sleep } from './utils.ts'
 import { db } from './db.ts'
 
+const MODE = Deno.env.get("MODE")
+
 interface PostItem {
   id: string
   from: string
@@ -72,7 +74,12 @@ for (const source of sourceList) {
       lastFetchDate.value ? lastFetchDate.value : 0,
       '',
       storage,
+      MODE
     )
+    // For debug
+    if (MODE === 'DEBUG') {
+      break
+    }
     console.log('获取成功，等待 5 秒...')
     await sleep(5)
   }

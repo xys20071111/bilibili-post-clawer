@@ -10,7 +10,7 @@ import { MongoServerError } from 'mongodb'
 async function fetchPostDetails() {
   const id = await '{{id}}'
   const req = await fetch(
-    `https://api.bilibili.com/x/polymer/web-dynamic/desktop/v1/detail?id=${id}&features=itemOpusStyle,opusBigCover,onlyfansVote,endFooterHidden,decorationCard,onlyfansAssetsV2,ugcDelete,onlyfansQaCard,commentsNewVersion`,
+    `https://api.bilibili.com/x/polymer/web-dynamic/v1/detail?id=${id}&features=itemOpusStyle,opusBigCover,onlyfansVote,endFooterHidden,decorationCard,onlyfansAssetsV2,ugcDelete,onlyfansQaCard,editable,opusPrivateVisible,avatarAutoTheme,sunflowerStyle,cardsEnhance,eva3CardOpus,eva3CardVideo,eva3CardComment,eva3CardVote,eva3CardUser`,
     {
       credentials: 'include',
     },
@@ -53,19 +53,24 @@ export async function fetchPostDetailsFromBrowser(
             fetchPostDetails.toString().replace('{{id}}', post.id)
           };return await fetchPostDetails();})()`,
         )
-        if (result.data) {
+        if (result && result.data && result.data.item) {
           const paresdData = parseDynamicItem(result.data.item)
           await db.savePost(post.id, post.from, result.data.item)
           console.log(`已获取 ${paresdData.author.name} 发布的动态 ${post.id}`)
           await storage.delete(['postId', post.id])
-        } else if ([0, -1024, 4101152].includes(result.code)) {
+        }
+        if ([0, -1024, 4101152].includes(result.code)) {
           await storage.delete(['postId', post.id])
         } else {
-          console.log("请检查代码！")
+          console.log('请检查代码！')
         }
         break
       } catch (e) {
-        if (e instanceof MongoServerError && e.message === 'Duplicate key violation on the requested collection: Index \'id_1\'') {
+        if (
+          e instanceof MongoServerError &&
+          e.message ===
+            "Duplicate key violation on the requested collection: Index 'id_1'"
+        ) {
           console.log(`去重功能疑似失效，出现了重复的爬取: ${post.id}`)
           break
         }

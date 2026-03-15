@@ -82,11 +82,16 @@ export function parseDynamicItem(item: any): ParsedDynamicItem {
   }
 
   // --- Comment ---
-  if (commentModule) {
+  if (commentModule && commentModule.comment && commentModule.comment.comment_id) {
     result.commentArea = {
       commentId: commentModule.comment.comment_id,
       commentType: commentModule.comment.comment_type,
     };
+  } else {
+    result.commentArea = {
+      commentId: item.basic.comment_id_str,
+      commentType: item.basic.comment_type
+    }
   }
 
   // --- Author and Publish Time ---

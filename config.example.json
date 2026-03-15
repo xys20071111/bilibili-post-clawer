@@ -4,7 +4,7 @@
   "browserDataPath": "./browser-data",
   "doNotFetchIfFetchedInThreeDays": true,
   "excludeFetched": true,
-  "dbName": "mihoyo",
+  "dbName": "bilibili_feed",
   "mongodb": {
     "uri": "mongodb://localhost:27017",
     "database": "bilibili_feed",

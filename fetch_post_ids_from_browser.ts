@@ -36,6 +36,7 @@ export async function fetchPostIdsFromBrowser(
   stopAt: number,
   baseOffset: string,
   storage: Deno.Kv,
+  debugMode: string | undefined
 ) {
   let hasMore = true
   let currentOffset = baseOffset
@@ -72,7 +73,9 @@ export async function fetchPostIdsFromBrowser(
       }
     }
     // For debug.
-    // break
+    if (debugMode === 'DEBUG') {
+      break
+    }
     await sleep(3)
   }
   await storage.set(['lastFetchDate', source.id], Math.round(Date.now() / 1000))
