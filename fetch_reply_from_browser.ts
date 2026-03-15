@@ -33,6 +33,7 @@ async function fetchPostRepliesFromBrowser(
   page: Page,
   oid: string,
   type: number,
+  storage: Deno.Kv,
 ) {
   if (!oid) {
     console.error('I don\'t know why but it is an undefined here.')
@@ -58,19 +59,19 @@ return await fetchPostReplies()
           if (result.code === 12002 || result.code === 12061) {
             console.log(`Post ${oid} doesn't have a comment area.`)
             hasMore = false
-            await db.markPostAsFetched(oid)
+            await storage.set(['fetched', oid], oid)
             break
           }
           if (result.code === -404) {
             console.log(`It's strange that this post doesn't have any reply and its code is -404`)
             hasMore = false
-            await db.markPostAsFetched(oid)
+            await storage.set(['fetched', oid], oid)
             break
           }
           if (result.code === -400) {
             console.log(`Can't fetch more replies from post ${oid}, result may incomplete.`)
             hasMore = false
-            await db.markPostAsFetched(oid)
+            await storage.set(['fetched', oid], oid)
             break
           }
           throw new Error(result.code)
@@ -81,7 +82,7 @@ return await fetchPostReplies()
           if (pageNum === 1) {
             console.log(`Post ${oid} does not have any reply.`)
           }
-          await db.markPostAsFetched(oid)
+          await storage.set(['fetched', oid], oid)
           break
         }
         for (const item of result.replies) {
@@ -143,8 +144,9 @@ if (import.meta.main) {
   const excludeList: string[] = []
   if (Config.excludeFetched) {
     console.log("Generating exclude list...")
-    const fetchedList = await db.getAllFetchedPosts()
-    excludeList.push(...fetchedList)
+    for await (const item of storage.list({ prefix: ['fetched'] })) {
+      excludeList.push(item.key[1] as string)
+    }
   }
   const postIds: Array<{
     oid: string
@@ -176,7 +178,7 @@ if (import.meta.main) {
       `Progress: ${i + 1}/${totalTaskCount} ${(((i + 1) / totalTaskCount) * 100).toFixed(4)}%`,
     )
     const { oid, type } = postIds[i]
-    await fetchPostRepliesFromBrowser(page, oid, type)
+    await fetchPostRepliesFromBrowser(page, oid, type, storage)
   }
   await storage.close()
   await browser.close()

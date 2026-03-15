@@ -40,7 +40,6 @@
 |database|`string`|数据库名称|
 |collections.posts|`string`|存储动态详情的集合名|
 |collections.replies|`string`|存储评论的集合名|
-|collections.fetchedPosts|`string`|存储已爬取评论标记的集合名|
 
 ### 运行
 
@@ -57,8 +56,10 @@
 
 ### 数据存储说明
 
-- **Deno KV (SQLite)**: 存储待获取的动态 ID 列表 (`postId`) 和各目标的最后爬取时间 (`lastFetchDate`)
+- **Deno KV (SQLite)**:
+  - `postId`: 待获取的动态 ID 列表
+  - `lastFetchDate`: 各目标的最后爬取时间
+  - `fetched`: 已爬取评论的动态标记
 - **MongoDB**:
   - `posts` 集合：动态详情数据
   - `replies` 集合：评论数据
-  - `fetched_posts` 集合：已爬取评论的动态标记

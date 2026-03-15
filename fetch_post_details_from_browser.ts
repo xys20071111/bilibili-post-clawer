@@ -44,11 +44,6 @@ export async function fetchPostDetailsFromBrowser(
   }>,
 ) {
   for (const post of postInfo) {
-    if (await db.postExists(post.id)) {
-      console.log(`${post} already fetched, pass...`)
-      await storage.delete(['postId', post.id])
-      continue
-    }
     for (let i = 0; i < 5; i++) {
       try {
         console.log(`fetching ${post.id} posted by ${post.from}`)
@@ -61,6 +56,7 @@ export async function fetchPostDetailsFromBrowser(
           const paresdData = parseDynamicItem(result.data.item)
           await db.savePost(post.id, post.from, result.data.item)
           console.log(`Post ${post.id} posted by ${paresdData.author.name} fetched.`)
+          await storage.delete(['postId', post.id])
         } else if ([0, -1024, 4101152].includes(result.code)) {
           await storage.delete(['postId', post.id])
         } else {

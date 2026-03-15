@@ -5,5 +5,5 @@ services:
     ports:
       - 10260:10260
     volumes:
-      - ./data:/home/documentdb/postgresql/
+      - ./data:/home/documentdb/postgresql/data
     command: "--username ${DB_USERNAME:-username} --password ${DB_PASSWORD:-password}"

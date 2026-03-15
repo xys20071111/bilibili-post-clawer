@@ -10,8 +10,7 @@
     "database": "bilibili_feed",
     "collections": {
       "posts": "posts",
-      "replies": "replies",
-      "fetchedPosts": "fetched_posts"
+      "replies": "replies"
     }
   }
 }
