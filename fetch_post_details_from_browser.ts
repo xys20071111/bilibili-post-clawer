@@ -23,6 +23,10 @@ async function fetchPostDetails() {
   }
   const res = await req.json()
   if (res.code !== 0) {
+    if (res.code === 500) {
+      denoLog(`${id} needs retry...`).then()
+      return res
+    }
     if (res.code === -1024 || res.code === 4101152) {
       denoLog(`${id} is an artical or not exists, skipped...`).then()
       return res
@@ -45,6 +49,7 @@ export async function fetchPostDetailsFromBrowser(
   }>,
 ) {
   for (const post of postInfo) {
+    let succeedFlag = false
     for (let i = 0; i < 5; i++) {
       try {
         console.log(`正在获取 ${post.from} 发布的动态 ${post.id}`)
@@ -58,9 +63,12 @@ export async function fetchPostDetailsFromBrowser(
           await db.savePost(post.id, post.from, result.data.item)
           console.log(`已获取 ${paresdData.author.name} 发布的动态 ${post.id}`)
           await storage.delete(['postId', post.id])
+          succeedFlag = true
         }
         if ([0, -1024, 4101152].includes(result.code)) {
           await storage.delete(['postId', post.id])
+        } else if ( 500 === result.code) {
+          throw new Error(`动态${post.id}需要重试.`)
         } else {
           console.log('请检查代码！')
         }
@@ -77,6 +85,10 @@ export async function fetchPostDetailsFromBrowser(
         console.log(e)
         console.error(`重试获取 ${post.id}，第 ${i} 次`)
       }
+      await sleep(3)
+    }
+    if (!succeedFlag) {
+      console.error(`动态 ${post.id} 获取失败`)
     }
     await sleep(3)
   }

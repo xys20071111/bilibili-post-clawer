@@ -23,7 +23,7 @@ const browser: Browser = await puppeteer.default.launch({
   headless: Config.headless,
   executablePath: Config.chromePath ?? '/usr/bin/google-chrome',
   userDataDir: Config.browserDataPath ?? './browser-data',
-  devtools: false,
+  devtools: !Config.headless,
   defaultViewport: null,
   pipe: true,
   protocolTimeout: 30 * 60 * 60 * 1000,
