@@ -67,7 +67,11 @@ export class MongoDB {
   }
 
   async getPostById(id: string): Promise<PostDocument | null> {
-    return await this.posts.findOne({ id })
+    const result = await this.posts.find({ id }, {noCursorTimeout: true}).toArray()
+    if (result.length === 0) {
+      return null
+    }
+    return result[0]
   }
 
   async saveReply(reply: ReplyDocument) {

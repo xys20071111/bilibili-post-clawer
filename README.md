@@ -26,8 +26,8 @@
 |chromePath|`string` (可选)|Chrome 可执行文件的路径|
 |browserDataPath|`string`|浏览器数据目录路径|
 |headless|`boolean`|是否启用无头模式|
-|doNotFetchIfFetchedInThreeDays|`boolean`|是否跳过 3 天内已爬取的目标|
-|excludeFetched|`boolean`|是否排除已爬取过的评论|
+|skipRecentlyFetchedDays|`number \| null`|跳过最近爬取过的天数（0 或负数表示不启用，null 表示不检查）|
+|excludeFetched|`boolean`|是否排除已爬取过的评论（已废弃，现默认爬取所有）|
 |dbName|`string`|Deno KV 数据库名称（用于存储待获取列表和最后爬取时间）|
 |sources|`array`|数据源列表，包含 `name`(昵称) 和 `id`(目标 uid)|
 |mongodb|`object`|MongoDB 配置（见下表）|
@@ -59,7 +59,7 @@
 - **Deno KV (SQLite)**:
   - `postId`: 待获取的动态 ID 列表
   - `lastFetchDate`: 各目标的最后爬取时间
-  - `fetched`: 已爬取评论的动态标记
+  - `reply_page`: 各动态评论区的爬取进度（`pageNum` 为最后爬取的页码，`lastFetchedAt` 为完全爬取时的时间戳）
 - **MongoDB**:
   - `posts` 集合：动态详情数据
-  - `replies` 集合：评论数据
+  - `replies` 集合：评论数据（使用 `rpid` 作为唯一键，重复评论会自动更新）

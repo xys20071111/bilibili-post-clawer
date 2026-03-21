@@ -59,14 +59,16 @@ if (sourceList.length === 0) {
   Deno.exit(1)
 }
 
+console.log("开始获取动态ID")
+
 for (const source of sourceList) {
   console.log(`当前目标：${source.name || source.id}`)
   const lastFetchDate = await storage.get<number>(['lastFetchDate', source.id])
   if (
-    Config.doNotFetchIfFetchedInThreeDays && lastFetchDate.value &&
-    Math.round(Date.now() / 1000) - lastFetchDate.value < 3 * 24 * 60 * 60
+    Config.skipRecentlyFetchedDays && Config.skipRecentlyFetchedDays > 0 && lastFetchDate.value &&
+    Math.round(Date.now() / 1000) - lastFetchDate.value < Config.skipRecentlyFetchedDays * 24 * 60 * 60
   ) {
-    console.log('过去 3 天内已获取，跳过。')
+    console.log('过去配置的天数内已获取，跳过。')
   } else {
     await fetchPostIdsFromBrowser(
       page,
@@ -85,6 +87,8 @@ for (const source of sourceList) {
   }
 }
 
+console.log("开始获取动态详情")
+
 const idIter = storage.list<string>({
   prefix: ['postId'],
 })
@@ -97,6 +101,8 @@ for await (const id of idIter) {
 }
 await db.connect()
 await fetchPostDetailsFromBrowser(page, storage, db, idList)
+
+console.log("开始获取原动态详情")
 
 const postIter = db.posts.find({}, { noCursorTimeout: true, batchSize: 50 })
 const origIdList: Array<PostItem> = []

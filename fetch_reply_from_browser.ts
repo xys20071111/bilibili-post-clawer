@@ -39,9 +39,24 @@ async function fetchPostRepliesFromBrowser(
     console.error('oid 未定义，原因未知。')
     return
   }
-  console.log(`正在获取动态 ${oid} 的评论...`)
-  let pageNum = 1
+  
+  const pageRecord = await storage.get<{ pageNum: number, lastFetchedAt?: number }>(['reply_page', oid])
+  const record = pageRecord.value
+  
+  if (record?.lastFetchedAt && Config.skipRecentlyFetchedDays && Config.skipRecentlyFetchedDays > 0) {
+    const cooldownMs = Config.skipRecentlyFetchedDays * 24 * 60 * 60 * 1000
+    const elapsedMs = Date.now() - record.lastFetchedAt
+    const elapsedDays = Math.floor(elapsedMs / (24 * 60 * 60 * 1000))
+    if (elapsedMs < cooldownMs) {
+      console.log(`动态 ${oid} 在冷却期内（${elapsedDays}天前获取过），跳过`)
+      return
+    }
+  }
+  
+  let pageNum = record?.pageNum ?? 1
   let hasMore = true
+  
+  console.log(`正在获取动态 ${oid} 的评论，从第 ${pageNum} 页开始...`)
   while (hasMore) {
     for (let i = 0; i < 5; i++) {
       try {
@@ -59,19 +74,16 @@ return await fetchPostReplies()
           if (result.code === 12002 || result.code === 12061) {
             console.log(`动态 ${oid} 没有评论区。`)
             hasMore = false
-            await storage.set(['fetched', oid], oid)
             break
           }
           if (result.code === -404) {
             console.log(`动态 ${oid} 没有评论，返回码为 -404`)
             hasMore = false
-            await storage.set(['fetched', oid], oid)
             break
           }
           if (result.code === -400) {
             console.log(`无法获取动态 ${oid} 的更多评论，结果可能不完整。`)
             hasMore = false
-            await storage.set(['fetched', oid], oid)
             break
           }
           throw new Error(result.code)
@@ -82,23 +94,31 @@ return await fetchPostReplies()
           if (pageNum === 1) {
             console.log(`动态 ${oid} 没有评论。`)
           }
-          await storage.set(['fetched', oid], oid)
+          await storage.set(['reply_page', oid], { pageNum, lastFetchedAt: Date.now() })
           break
         }
         for (const item of result.replies) {
-          await db.saveReply({
-            rpid: item.rpid_str,
-            oid: item.oid_str,
-            oidType: item.type,
-            ctime: item.ctime,
-            uid: item.mid_str,
-            parent: item.parent_str,
-            nickname: item.member.uname,
-            content: item.content.message,
-            like: item.like,
-            replyControl: item.reply_control
-          })
+          try {
+            await db.saveReply({
+              rpid: item.rpid_str,
+              oid: item.oid_str,
+              oidType: item.type,
+              ctime: item.ctime,
+              uid: item.mid_str,
+              parent: item.parent_str,
+              nickname: item.member.uname,
+              content: item.content.message,
+              like: item.like,
+              replyControl: item.reply_control
+            })
+          } catch (e) {
+            if (e.code === 11000) {
+              continue
+            }
+            throw e
+          }
         }
+        await storage.set(['reply_page', oid], { pageNum })
         break
       } catch (e) {
         console.error(`重试获取动态 ${oid} 的评论，第 ${i} 次`)
@@ -141,22 +161,12 @@ if (import.meta.main) {
   await db.connect()
   const postList = db.posts.find({}, { noCursorTimeout: true })
   const page = await browser.newPage()
-  const excludeList: string[] = []
-  if (Config.excludeFetched) {
-    console.log("正在生成排除列表...")
-    for await (const item of storage.list({ prefix: ['fetched'] })) {
-      excludeList.push(item.key[1] as string)
-    }
-  }
   const postIds: Array<{
     oid: string
     type: number
   }> = []
   for await (const post of postList) {
     const parsedPost = parseDynamicItem(post.data as any)
-    if (excludeList.includes(parsedPost.commentArea.commentId!)) {
-      continue
-    }
     if (parsedPost.commentArea.commentId) {
       postIds.push({
         oid: parsedPost.commentArea.commentId,

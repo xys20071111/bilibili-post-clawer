@@ -12,7 +12,7 @@ interface Configuration {
   chromePath?: string
   browserDataPath: string
   headless: boolean
-  doNotFetchIfFetchedInThreeDays: boolean
+  skipRecentlyFetchedDays: number | null
   excludeFetched: boolean
   dbName: string
   mongodb?: MongoDBConfig
