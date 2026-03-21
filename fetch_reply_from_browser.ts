@@ -84,6 +84,7 @@ return await fetchPostReplies()
           if (result.code === -400) {
             console.log(`无法获取动态 ${oid} 的更多评论，结果可能不完整。`)
             hasMore = false
+            await storage.set(['reply_page', oid], { pageNum, lastFetchedAt: Date.now() })
             break
           }
           throw new Error(result.code)
@@ -91,9 +92,6 @@ return await fetchPostReplies()
         hasMore = result.replies !== null
         if (!hasMore) {
           console.log(`动态 ${oid} 评论获取完成`)
-          if (pageNum === 1) {
-            console.log(`动态 ${oid} 没有评论。`)
-          }
           await storage.set(['reply_page', oid], { pageNum, lastFetchedAt: Date.now() })
           break
         }
